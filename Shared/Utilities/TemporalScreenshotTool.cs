@@ -57,10 +57,11 @@ namespace Graphics
         public bool _captureRenderDoc;
         public bool captureSEGIfullscreen = true;
         public bool enableCTAASuperSampling = false;
-        //public bool highQualityNGSS = true;
         public bool highResReflectionProbes = true;
         public bool highResSSR = true;
-        //public bool highQualityVolumetrics = true;
+        public bool enableMaskMSAA = true;
+        public bool enableCharacterMask = false;
+        public bool highResSSS = true;
 
         public ShadowResolutionOverride customShadowResolutionOverride;
         public ShadowCascadesOverride customShadowCascadesOverride;
@@ -108,6 +109,10 @@ namespace Graphics
         private Fsr3Upscaler.QualityMode origFSRquality;
 
         private ScreenSpaceReflectionPreset origSSRPreset;
+        private LayerMask characterCullingMask = 0;
+        private Camera maskCamera;
+        private RenderTexture maskRenderTarget;
+        private RenderTexture resolvedMaskRenderTarget;
 
         //private ResMode origDepthMode;
         //private ResMode origRayMode;
@@ -122,6 +127,7 @@ namespace Graphics
         AssetBundle assetBundle, loadingBundle;
         ComputeShader copyShader;
         Shader loadingShader;
+        Shader characterMaskShader;
 
         public static readonly int shaderId_IsScreenshotActive = Shader.PropertyToID("_IsScreenshotActive"); // Equals to 0 if game is running normally, not 0 if screenshot is being made
         public static readonly int shaderId_ScreenshotToolFrame = Shader.PropertyToID("_ScreenshotToolFrame"); // Frame counter, equals to 0 unless screenshot is being made, in which case increments by 1 every take
@@ -133,6 +139,7 @@ namespace Graphics
         {
             assetBundle = AssetBundle.LoadFromMemory(ResourceUtils.GetEmbeddedResource("temporalscreen.unity3d"));
             copyShader = assetBundle.LoadAsset<ComputeShader>("Assets/temporal screenshot/Resources/RawTextureCopy.compute");
+            characterMaskShader = assetBundle.LoadAsset<Shader>("Assets/temporal screenshot/Resources/CharMaskPassReplacement.shader");
             loadingBundle = AssetBundle.LoadFromMemory(ResourceUtils.GetEmbeddedResource("loading.unity3d"));
             loadingShader = loadingBundle.LoadAsset<Shader>("Assets/LoadingShader/LoadingShader.shader");
             _camera = GetComponent<Camera>();
@@ -173,20 +180,7 @@ namespace Graphics
             _camera.RemoveCommandBuffer(CameraEvent.AfterImageEffects, cmd);
             cmd.Release();
             cmd = null;
-
-            Destroy(cameraRenderTarget);
-            cameraRenderTarget = null;
-            Destroy(cpuTarget);
-            cpuTarget = null;
-
-            if (downsizedTarget)
-            {
-                Destroy(downsizedTarget);
-                downsizedTarget = null;
-            }
-
-            textureDataBuffer.Dispose();
-            textureDataBuffer = null;
+            CleanupRenderTextures();
 
             RestoreSettings();
 
@@ -256,6 +250,11 @@ namespace Graphics
             }
             else
             {
+                if (enableCharacterMask && maskCamera != null)
+                {
+                    maskCamera.Render();
+                }
+
                 _camera.Render();
                 yield return new WaitForEndOfFrame();
             }
@@ -313,7 +312,7 @@ namespace Graphics
                 if (scaler != null && scaler.scaleFactor != 1f)
                     continue;
 
-                if (canvas.gameObject != loadingCanvas && canvas.enabled)
+                if (canvas != loadingCanvas && canvas.enabled)
                 {
                     canvas.enabled = false;
                     _disabledCanvases.Add(canvas);
@@ -353,7 +352,6 @@ namespace Graphics
 
         void SetRenderTextures()
         {
-
             // Set text
             loadingAnimation.SetText("Preparing Render Textures...");
             TemporalScreenshotManager.Hooks.GetDimensions(out Vector2Int _screenshotResolution, out int _supersampling);
@@ -395,6 +393,132 @@ namespace Graphics
                     // nothing to do yet...
                     break;
             }
+
+            if (enableCharacterMask && characterMaskShader != null)
+            {
+                CreateMaskCamera(_screenshotResolution.x, _screenshotResolution.y);
+                UpdateMaskCameraParameters();
+            }
+        }
+
+        void UpdateMaskCameraParameters()
+        {
+            if (maskCamera == null)
+                return;
+
+            int charaLayer = LayerMask.NameToLayer("Chara");
+            characterCullingMask = charaLayer >= 0 ? (1 << charaLayer) : _camera.cullingMask;
+
+            maskCamera.transform.position = _camera.transform.position;
+            maskCamera.transform.rotation = _camera.transform.rotation;
+            maskCamera.fieldOfView = _camera.fieldOfView;
+            maskCamera.nearClipPlane = _camera.nearClipPlane;
+            maskCamera.farClipPlane = _camera.farClipPlane;
+            maskCamera.orthographic = _camera.orthographic;
+            maskCamera.orthographicSize = _camera.orthographicSize;
+            maskCamera.allowMSAA = enableMaskMSAA;
+            maskCamera.cullingMask = characterCullingMask;
+            maskCamera.targetTexture = maskRenderTarget;
+
+            if (maskCamera.targetTexture != null)
+            {
+                maskCamera.aspect = (float)maskCamera.targetTexture.width / maskCamera.targetTexture.height;
+            }
+
+            maskCamera.enabled = hasTemporal;
+        }
+
+        void CleanupRenderTextures()
+        {
+            if (_camera != null)
+            {
+                _camera.targetTexture = null;
+            }
+
+            if (maskCamera != null)
+            {
+                maskCamera.targetTexture = null;
+                Destroy(maskCamera.gameObject);
+                maskCamera = null;
+            }
+
+            if (cameraRenderTarget != null)
+            {
+                Destroy(cameraRenderTarget);
+                cameraRenderTarget = null;
+            }
+
+            if (maskRenderTarget != null)
+            {
+                maskRenderTarget.Release();
+                Destroy(maskRenderTarget);
+                maskRenderTarget = null;
+            }
+
+            if (resolvedMaskRenderTarget != null)
+            {
+                resolvedMaskRenderTarget.Release();
+                Destroy(resolvedMaskRenderTarget);
+                resolvedMaskRenderTarget = null;
+            }
+
+            if (cpuTarget != null)
+            {
+                Destroy(cpuTarget);
+                cpuTarget = null;
+            }
+
+            if (downsizedTarget != null)
+            {
+                Destroy(downsizedTarget);
+                downsizedTarget = null;
+            }
+
+            if (textureDataBuffer != null)
+            {
+                textureDataBuffer.Dispose();
+                textureDataBuffer = null;
+            }
+        }
+
+        void CreateMaskCamera(int width, int height)
+        {
+            GameObject maskCamObj = new GameObject("CharacterMaskCamera");
+            maskCamObj.transform.SetParent(transform);
+            maskCamObj.transform.localPosition = Vector3.zero;
+            maskCamObj.transform.localRotation = Quaternion.identity;
+
+            maskCamera = maskCamObj.AddComponent<Camera>();
+            maskCamera.transform.SetPositionAndRotation(_camera.transform.position, _camera.transform.rotation);
+            maskCamera.fieldOfView = _camera.fieldOfView;
+            maskCamera.nearClipPlane = _camera.nearClipPlane;
+            maskCamera.farClipPlane = _camera.farClipPlane;
+            maskCamera.aspect = _camera.aspect;
+            maskCamera.orthographic = _camera.orthographic;
+            maskCamera.orthographicSize = _camera.orthographicSize;
+            maskCamera.renderingPath = RenderingPath.Forward;
+            maskCamera.enabled = false;
+            maskCamera.clearFlags = CameraClearFlags.SolidColor;
+            maskCamera.backgroundColor = Color.black;
+            maskCamera.depth = _camera.depth + 1;
+            maskCamera.SetReplacementShader(characterMaskShader, "RenderType");
+
+            loadingAnimation.SetText("Preparing Character Mask...");
+
+            int msaaSamples = enableMaskMSAA ? 2 : 1;
+            maskRenderTarget = new RenderTexture(width, height, 24, GraphicsFormat.R8_UNorm)
+            {
+                antiAliasing = msaaSamples,
+                name = "Character Mask Render Target (MSAA)"
+            };
+            maskRenderTarget.Create();
+
+            resolvedMaskRenderTarget = new RenderTexture(width, height, 0, GraphicsFormat.R8_UNorm)
+            {
+                antiAliasing = 1,
+                name = "Character Mask Resolved"
+            };
+            resolvedMaskRenderTarget.Create();
         }
 
         void SaveScreenshotToFile(CommandBuffer cmd)
@@ -412,11 +536,18 @@ namespace Graphics
             if (origAAMode == PostProcessingSettings.Antialiasing.CTAA)
                 cmd.Blit(BuiltinRenderTextureType.CameraTarget, finalTarget);
 
-            cmd.SetComputeBufferParam(copyShader, 0, "Output", textureDataBuffer);
-            cmd.SetComputeTextureParam(copyShader, 0, "Input", finalTarget);
-            cmd.SetComputeFloatParam(copyShader, "ForceRemoveAlpha", _forceRemoveAlpha ? 1f : 0f);
+            int kernelIndex = copyShader.FindKernel(enableCharacterMask && maskRenderTarget != null ? "CSMainWithMask" : "CSMain");
+            cmd.SetComputeBufferParam(copyShader, kernelIndex, "Output", textureDataBuffer);
+            cmd.SetComputeTextureParam(copyShader, kernelIndex, "Input", finalTarget);
+            cmd.SetComputeFloatParam(copyShader, "ForceRemoveAlpha", enableCharacterMask ? 0f : (_forceRemoveAlpha ? 1f : 0f));
 
-            cmd.DispatchCompute(copyShader, 0, (finalTarget.width + 7) / 8, (finalTarget.height + 7) / 8, 1);
+            if (enableCharacterMask && maskRenderTarget != null && resolvedMaskRenderTarget != null)
+            {
+                cmd.Blit(maskRenderTarget, resolvedMaskRenderTarget);
+                cmd.SetComputeTextureParam(copyShader, kernelIndex, "MaskInput", resolvedMaskRenderTarget);
+            }
+
+            cmd.DispatchCompute(copyShader, kernelIndex, (finalTarget.width + 7) / 8, (finalTarget.height + 7) / 8, 1);
             cmd.RequestAsyncReadback(textureDataBuffer, (read) =>
             {
                 var textureData = read.GetData<Vector4>();
@@ -435,8 +566,9 @@ namespace Graphics
 
                 byte[] data;
                 string filename = TemporalScreenshotManager.Hooks.GetUniqueFilename(out string extension, out int _jpegQuality);
+                string type = enableCharacterMask ? "rendered alpha" : "rendered";
 
-                LogScreenshotMessage("rendered", filename);
+                LogScreenshotMessage(type, filename);
 
                 switch (extension)
                 {
@@ -452,20 +584,7 @@ namespace Graphics
                 }
 
                 File.WriteAllBytes(filename, data);
-
-                Destroy(cameraRenderTarget);
-                cameraRenderTarget = null;
-                Destroy(cpuTarget);
-                cpuTarget = null;
-
-                if (downsizedTarget)
-                {
-                    Destroy(downsizedTarget);
-                    downsizedTarget = null;
-                }
-
-                textureDataBuffer.Dispose();
-                textureDataBuffer = null;
+                CleanupRenderTextures();
             });
 
             //UnityEngine.Graphics.ExecuteCommandBuffer(cmd);
@@ -483,6 +602,11 @@ namespace Graphics
 
             if (origAAMode == PostProcessingSettings.Antialiasing.CTAA)
                 cmd.Blit(BuiltinRenderTextureType.CameraTarget, finalTarget);
+
+            if (enableCharacterMask && maskCamera != null && !maskCamera.enabled)
+            {
+                maskCamera.Render();
+            }
 
             _camera.AddCommandBuffer(CameraEvent.AfterImageEffects, cmd);
         }
@@ -938,6 +1062,7 @@ namespace Graphics
             // Создаем Canvas для загрузки
             GameObject canvasObj = new GameObject("LoadingCanvas");
             Canvas canvas = canvasObj.AddComponent<Canvas>();
+            loadingCanvas = canvas;
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 32767;
             canvasObj.AddComponent<CanvasScaler>();

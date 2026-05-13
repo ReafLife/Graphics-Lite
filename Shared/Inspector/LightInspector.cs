@@ -32,7 +32,7 @@ namespace Graphics.Inspector
             paddingT = Mathf.RoundToInt(renderSettings.FontSize * 1.5f);
             floorsize = Mathf.RoundToInt(renderSettings.FontSize);
             lightbox = Inspector.Height * 0.25f;
-            lightbuttonwidth = Inspector.Width * 0.32f;
+            lightbuttonwidth = (Inspector.Width - GUIStyles.toolbarWidth) * 0.32f;
 
             Tab = new GUIStyle(GUIStyles.tabcontent);
             Tab.padding = new RectOffset(paddingL, paddingL, paddingT, paddingT);
@@ -434,6 +434,8 @@ namespace Graphics.Inspector
             DrawAdditionalCamLight(lightManager);
             //Shadows
             DrawLocalShadowsSettings(lightManager, customShadowResolutionHandler);
+            //Cookies
+            DrawCookieSettings(lightManager);
             //Layers
             DrawLayersSettings(lightManager);
             //Alloy
@@ -646,35 +648,46 @@ namespace Graphics.Inspector
             SelectionVertical("Render Mode", lightManager.SelectedLight.Light.renderMode, mode => lightManager.SelectedLight.Light.renderMode = mode, 3);
         }
 
-        //private static void DrawCookieSettings(LightManager lightManager)
-        //{
-        //    GUILayout.Space(labelspace);
-        //    Label("COOKIE", "", true);
-        //    GUILayout.Space(10);
+        private static void DrawCookieSettings(LightManager lightManager)
+        {
+            GUILayout.Space(labelspace);
+            Label("COOKIE", "", true);
+            GUILayout.Space(10);
 
+            CookieTextureManager cookieTextureManager = lightManager.SelectedLight.Light.GetComponent<CookieTextureManager>();
+            if (cookieTextureManager == null)
+            {
+                Label("Cookie texture manager is unavailable for this light.", "", false);
+                return;
+            }
 
+            ToggleAlt("Enable Cookie Texture", cookieTextureManager.enabled, false, isCookieEnabled => cookieTextureManager.enabled = isCookieEnabled);
 
-        //    CookieTextureManager cookieTextureManager = lightManager.SelectedLight.Light.GetComponent<CookieTextureManager>();
-        //    ToggleAlt("Enable Cookie Texture", cookieTextureManager.enabled, false, isCookieEnabled => cookieTextureManager.enabled = isCookieEnabled);
+            GUILayout.Space(5);
+            if (cookieTextureManager.enabled)
+            {
+                if (!CookieTextureManager.IsManagerReady())
+                {
+                    Label("Loading cookie textures...", "", false);
+                    return;
+                }
 
-        //    GUILayout.Space(5);
-        //    if (cookieTextureManager.enabled)
-        //    {
-        //        Label("Cookie Texture: " + cookieTextureManager.cookiename, "", false);
-        //        GUILayout.Space(5);
-        //        DrawTextureGrid(
-        //        cookieTextureManager.SPOTCookieNames,
-        //        cookieTextureManager._spotCookieManager.Textures.ToArray(),
-        //        cookieTextureManager.CurrentSpotCookieName,
-        //        name => {
-        //            if (name != cookieTextureManager.CurrentSpotCookieName)
-        //            {
-        //                cookieTextureManager.ApplyCookieTexture(name);
-        //                //cookieTextureManager.Saved = name;
-        //            }
-        //        }, previewSize: 64f);
-        //    }
-        //}
+                Label("Cookie Texture: " + cookieTextureManager.cookiename, "", false);
+                GUILayout.Space(5);
+                DrawTextureGrid(
+                    cookieTextureManager.SPOTCookieNames,
+                    cookieTextureManager._spotCookieManager.Textures.ToArray(),
+                    cookieTextureManager.CurrentSpotCookieName,
+                    name =>
+                    {
+                        if (name != cookieTextureManager.CurrentSpotCookieName)
+                        {
+                            cookieTextureManager.ApplyCookieTexture(name);
+                        }
+                    },
+                    previewSize: 64f);
+            }
+        }
 
         private static GameObject lightToDestroy = null;
         private static void LightOverviewModule(LightManager lightManager, LightObject l)

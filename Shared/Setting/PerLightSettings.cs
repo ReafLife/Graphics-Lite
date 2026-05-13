@@ -182,25 +182,24 @@ namespace Graphics
             //    LogWithDotsLight($"{lightObject.Light.name} volumetric settings", "SET");
             //}
 
-            //// Apply cookie texture when manager ready
-            //if (!string.IsNullOrEmpty(CookieTextureName))
-            //{
-            //    if (CookieTextureManager.IsManagerReady())
-            //    {
-            //        CookieTextureManager cookieTextureManager = lightObject.Light.GetComponent<CookieTextureManager>();
-            //        if (cookieTextureManager != null)
-            //        {
-            //            cookieTextureManager.enabled = IsCookieEnabled;
-            //            cookieTextureManager.cookiename = CookieTextureName;
-            //            if (cookieTextureManager.enabled)
-            //                cookieTextureManager.ApplyCookieTexture(CookieTextureName);
-            //        }
-            //    }
-            //    else
-            //    {
-            //        Graphics.Instance.Log.LogWarning($"Cookie manager not ready when applying settings to {lightObject.Light.name}");
-            //    }
-            //}
+            if (!string.IsNullOrEmpty(CookieTextureName))
+            {
+                if (CookieTextureManager.IsManagerReady())
+                {
+                    CookieTextureManager cookieTextureManager = lightObject.Light.GetComponent<CookieTextureManager>();
+                    if (cookieTextureManager != null)
+                    {
+                        cookieTextureManager.enabled = IsCookieEnabled;
+                        cookieTextureManager.cookiename = CookieTextureName;
+                        if (cookieTextureManager.enabled)
+                            cookieTextureManager.ApplyCookieTexture(CookieTextureName);
+                    }
+                }
+                else
+                {
+                    Graphics.Instance.Log.LogWarning($"Cookie manager not ready when applying settings to {lightObject.Light.name}");
+                }
+            }
         }
 
         internal void FillSettings(LightObject lightObject)
@@ -300,13 +299,12 @@ namespace Graphics
             //    MaxRayLength = volumetricLight.MaxRayLength;
             //}
 
-            ////Cookie Settings
-            //CookieTextureManager cookieTextureManager = lightObject.Light.GetComponent<CookieTextureManager>();
-            //if (cookieTextureManager != null)
-            //{
-            //    IsCookieEnabled = cookieTextureManager.enabled;
-            //    CookieTextureName = cookieTextureManager.cookiename;
-            //}
+            CookieTextureManager cookieTextureManager = lightObject.Light.GetComponent<CookieTextureManager>();
+            if (cookieTextureManager != null)
+            {
+                IsCookieEnabled = cookieTextureManager.enabled;
+                CookieTextureName = cookieTextureManager.cookiename;
+            }
         }
 
         internal static bool GraphicsAddedLight(Light light)

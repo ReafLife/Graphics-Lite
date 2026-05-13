@@ -44,6 +44,7 @@ namespace Graphics
                 {
                     case LightType.Spot:
                         SpotLights.Add(lights);
+                        lights.Light.GetOrAddComponent<CookieTextureManager>();
                         if (UseAlloyLight)
                             lights.Light.GetOrAddComponent<AlloyAreaLight>().UpdateBinding();
                         break;
