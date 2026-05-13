@@ -8,6 +8,7 @@ using UnityEngine.Rendering.PostProcessing;
 using static Graphics.Inspector.Util;
 using Graphics.AmplifyOcclusion;
 using System.Collections.Generic;
+using System.Linq;
 
 
 namespace Graphics.Inspector
@@ -45,84 +46,91 @@ namespace Graphics.Inspector
             SwitchLabel.fixedHeight = switchHeight;
         }
 
-        internal static void Draw(LightManager lightManager, PostProcessingSettings settings, GlobalSettings renderSettings, PostProcessingManager postprocessingManager, bool showAdvanced)
+        internal static void Draw(LightManager lightManager, PostProcessingSettings settings, GlobalSettings renderSettings, PostProcessingManager postprocessingManager, bool showAdvanced, Inspector.PostProcessingSubTab selectedSubTab)
         {
-
             UpdateCachedValues(renderSettings);
 
+            postScrollView = GUILayout.BeginScrollView(postScrollView, false, true);
+
+            switch (selectedSubTab)
+            {
+                case Inspector.PostProcessingSubTab.Volume:
+                    DrawVolumeSettings(settings, showAdvanced);
+                    break;
+                case Inspector.PostProcessingSubTab.AmbientOcclusion:
+                    DrawAmbientOcclusion(settings);
+                    break;
+                case Inspector.PostProcessingSubTab.Bloom:
+                    DrawBloom(settings, postprocessingManager);
+                    break;
+                case Inspector.PostProcessingSubTab.ColorGrading:
+                    DrawColorGrading(settings, postprocessingManager);
+                    break;
+                case Inspector.PostProcessingSubTab.SSR:
+                    DrawScreenSpaceReflections(settings, renderSettings);
+                    break;
+                case Inspector.PostProcessingSubTab.AutoExposure:
+                    DrawAutoExposure(settings);
+                    break;
+                case Inspector.PostProcessingSubTab.ChromaticAberration:
+                    DrawChromaticAberrationLayer(settings, postprocessingManager);
+                    break;
+                case Inspector.PostProcessingSubTab.DepthOfField:
+                    DrawDepthOfFieldLayer(settings);
+                    break;
+                case Inspector.PostProcessingSubTab.Grain:
+                    DrawGrainLayer();
+                    break;
+                case Inspector.PostProcessingSubTab.Vignette:
+                    DrawVignetteLayer(settings);
+                    break;
+                case Inspector.PostProcessingSubTab.MotionBlur:
+                    DrawMotionBlurLayer(settings);
+                    break;
+                case Inspector.PostProcessingSubTab.SunShafts:
+                    DrawSunShaftsHDR(lightManager, settings, renderSettings);
+                    break;
+                case Inspector.PostProcessingSubTab.GlobalFog:
+                    DrawGlobalFogLayer();
+                    break;
+                case Inspector.PostProcessingSubTab.LuxWater:
+                    DrawLuxWaterLayer(lightManager);
+                    break;
+                case Inspector.PostProcessingSubTab.Aura:
+                    DrawAuraLayer();
+                    break;
+            }
+
+            GUILayout.EndScrollView();
+        }
+
+        private static void DrawVolumeSettings(PostProcessingSettings settings, bool showAdvanced)
+        {
             GUILayout.BeginVertical(TabContent);
             {
-                //GUILayout.Space(10);
                 Label("POST PROCESSING", "", true);
                 GUILayout.Space(1);
                 if (showAdvanced)
                 {
                     Label("Volume blending", "", true);
                     GUILayout.Space(1);
-                    string trigger = null != settings && null != settings.VolumeTriggerSetting ? settings.VolumeTriggerSetting.name : "";
+                    string trigger = settings != null && settings.VolumeTriggerSetting != null ? settings.VolumeTriggerSetting.name : "";
                     Label("Trigger", trigger);
                     Label("Layer", LayerMask.LayerToName(Mathf.RoundToInt(Mathf.Log(settings.VolumeLayerSetting.value, 2))));
                     GUILayout.Space(10);
                 }
-                string volumeLabel = "Post Process Volume";
-                if (showAdvanced)
-                {
-                    volumeLabel = "Post Process Volumes";
-                }
+
+                string volumeLabel = showAdvanced ? "Post Process Volumes" : "Post Process Volume";
                 Label(volumeLabel, "", true);
                 GUILayout.Space(10);
 
                 PostProcessVolume volume = settings.Volume;
-                GUILayout.Space(10);
-                Slider("Weight", volume.weight, 0f, 1f, "N1", weight => volume.weight = weight);
-
+                if (volume != null)
+                {
+                    Slider("Weight", volume.weight, 0f, 1f, "N1", weight => volume.weight = weight);
+                }
             }
             GUILayout.EndVertical();
-            postScrollView = GUILayout.BeginScrollView(postScrollView);
-
-            // Draw Ambient Occlusion
-            DrawAmbientOcclusion(settings);
-
-            // Draw Bloom
-            DrawBloom(settings, postprocessingManager);
-
-            // Draw Sun Shafts HDR
-            DrawSunShaftsHDR(lightManager, settings, renderSettings);
-
-            // Draw Color Grading
-            DrawColorGrading(settings, postprocessingManager);
-
-            // Draw Screen Space Reflections
-            DrawScreenSpaceReflections(settings, renderSettings);
-
-            // Draw Auto Exposure
-            DrawAutoExposure(settings);
-
-            // Draw Chromatic Aberration Layer
-            DrawChromaticAberrationLayer(settings, postprocessingManager);
-
-            // Draw Depth Of Field Layer
-            DrawDepthOfFieldLayer(settings);
-
-            // Draw Grain Layer
-            DrawGrainLayer();
-
-            // Draw Vignette Layer
-            DrawVignetteLayer(settings);
-
-            // Draw Motion Blur Layer
-            DrawMotionBlurLayer(settings);
-
-            // DrawGlobalFog
-            DrawGlobalFogLayer();
-
-            // Draw Lux Water
-            DrawLuxWaterLayer(lightManager);
-
-            // Draw Aura Layer
-            DrawAuraLayer();
-
-            GUILayout.EndScrollView();
         }
 
 
@@ -130,58 +138,31 @@ namespace Graphics.Inspector
         {
             GUILayout.BeginVertical(SmallTab);
 
-            PostProcessingSettings.AmbientOcclusionList AOList;
-            // Check state every frame for backwards compatibility with scenes that might have multiple enabled.
-            if (settings.ambientOcclusionLayer != null && settings.ambientOcclusionLayer.active && settings.ambientOcclusionLayer.enabled.value)
-                AOList = PostProcessingSettings.AmbientOcclusionList.Legacy;
-            else if (VAOManager.settings != null && VAOManager.settings.Enabled)
-                AOList = PostProcessingSettings.AmbientOcclusionList.VAO;
-            else if (GTAOManager.settings != null && GTAOManager.settings.Enabled)
-                AOList = PostProcessingSettings.AmbientOcclusionList.GTAO;
-            else if (AmplifyOccManager.settings != null && AmplifyOccManager.settings.Enabled)
-                AOList = PostProcessingSettings.AmbientOcclusionList.Amplify;
-            else
-                AOList = PostProcessingSettings.AmbientOcclusionList.None;
-            Action<PostProcessingSettings.AmbientOcclusionList> AOEnable = aol =>
-            {
-                //Console.WriteLine(aol);
-                if (settings.ambientOcclusionLayer != null)
-                    settings.ambientOcclusionLayer.active = settings.ambientOcclusionLayer.enabled.value = PostProcessingSettings.AmbientOcclusionList.Legacy == aol;
-                if (VAOManager.settings != null)
-                {
-                    var n = PostProcessingSettings.AmbientOcclusionList.VAO == aol;
-                    var s = VAOManager.settings.Enabled == n;
-                    VAOManager.settings.Enabled = n;
-                    if (!s) VAOManager.UpdateSettings();
-                }
-                if (GTAOManager.settings != null)
-                {
-                    var n = PostProcessingSettings.AmbientOcclusionList.GTAO == aol;
-                    var s = GTAOManager.settings.Enabled == n;
-                    GTAOManager.settings.Enabled = n;
-                    if (!s) GTAOManager.UpdateSettings();
-                }
-                if (AmplifyOccManager.settings != null)
-                {
-                    var n = PostProcessingSettings.AmbientOcclusionList.Amplify == aol;
-                    var s = AmplifyOccManager.settings.Enabled == n;
-                    AmplifyOccManager.settings.Enabled = n;
-                    if (!s) AmplifyOccManager.UpdateSettings();
-                }
-            };
-            SelectionAO("AMBIENT OCCLUSION", AOList, AOEnable, 5);
-            if (PostProcessingSettings.AmbientOcclusionList.Legacy == AOList)
-            {
-                if (settings.ambientOcclusionLayer != null)
-                {
-                    //GUILayout.Space(30);
+            bool legacyAOEnabled = settings.ambientOcclusionLayer != null && settings.ambientOcclusionLayer.active && settings.ambientOcclusionLayer.enabled.value;
+            bool vaoAOEnabled = VAOManager.settings != null && VAOManager.settings.Enabled;
+            bool gtaoAOEnabled = GTAOManager.settings != null && GTAOManager.settings.Enabled;
+            bool amplifyAOEnabled = AmplifyOccManager.settings != null && AmplifyOccManager.settings.Enabled;
 
-                    //ToggleAlt("Enable", settings.ambientOcclusionLayer.enabled.value, true, AOEnable);
-                    //ToggleAlt("Enable", settings.ambientOcclusionLayer.enabled.value, true, enabled => settings.ambientOcclusionLayer.active = settings.ambientOcclusionLayer.enabled.value = enabled);
+            if (Graphics.Instance.CameraSettings.RenderingPath != CameraSettings.AIRenderingPath.Deferred && gtaoAOEnabled)
+            {
+                GTAOManager.settings.Enabled = false;
+                GTAOManager.UpdateSettings();
+                gtaoAOEnabled = false;
+            }
+
+            DrawAmbientOcclusionSelector(settings, ref legacyAOEnabled, ref vaoAOEnabled, ref gtaoAOEnabled, ref amplifyAOEnabled);
+
+            if (legacyAOEnabled)
+            {
+                if (settings.ambientOcclusionLayer != null)
+                {
                     if (settings.ambientOcclusionLayer.enabled.value)
                     {
                         GUILayout.Space(30);
-                        Selection("Mode", settings.ambientOcclusionLayer.mode.value, mode => settings.ambientOcclusionLayer.mode.value = mode);
+                        Label("Legacy", "", true);
+                        GUILayout.Space(10);
+                        SelectionVertical("Mode", settings.ambientOcclusionLayer.mode.value, mode => settings.ambientOcclusionLayer.mode.value = mode);
+                        GUILayout.Space(10);
                         Slider("Intensity", settings.ambientOcclusionLayer.intensity.value, 0f, 4f, "N2",
                             intensity => settings.ambientOcclusionLayer.intensity.value = intensity, settings.ambientOcclusionLayer.intensity.overrideState,
                             overrideState => settings.ambientOcclusionLayer.intensity.overrideState = overrideState);
@@ -207,17 +188,17 @@ namespace Graphics.Inspector
 
                 }
             }
-            if (PostProcessingSettings.AmbientOcclusionList.VAO == AOList)
+            if (vaoAOEnabled)
             {
                 if (VAOManager.settings != null)
                 {
                     VAOSettings vaoSettings = VAOManager.settings;
-                    //GUILayout.Space(30);
 
-                    //ToggleAlt("Enable", vaoSettings.Enabled, true, AOEnable);
                     if (vaoSettings.Enabled)
                     {
                         GUILayout.Space(30);
+                        Label("VAO", "", true);
+                        GUILayout.Space(10);
                         Label("Basic Settings:", "", true);
                         Slider("Radius", vaoSettings.Radius.value, 0f, 0.5f, "N2", radius => { vaoSettings.Radius.value = radius; VAOManager.UpdateSettings(); }, vaoSettings.Radius.overrideState, overrideState => { vaoSettings.Radius.overrideState = overrideState; VAOManager.UpdateSettings(); });
                         Slider("Power", vaoSettings.Power.value, 0f, 2f, "N2", power => { vaoSettings.Power.value = power; VAOManager.UpdateSettings(); }, vaoSettings.Power.overrideState, overrideState => { vaoSettings.Power.overrideState = overrideState; VAOManager.UpdateSettings(); });
@@ -352,7 +333,7 @@ namespace Graphics.Inspector
                 }
             }
 
-            if (PostProcessingSettings.AmbientOcclusionList.GTAO == AOList)
+            if (gtaoAOEnabled)
             {
                 if (GTAOManager.settings != null)
                 {
@@ -373,6 +354,8 @@ namespace Graphics.Inspector
                         if (gtaoSettings.Enabled)
                         {
                             GUILayout.Space(30);
+                            Label("GTAO", "", true);
+                            GUILayout.Space(10);
                             Slider("Intensity", gtaoSettings.Intensity.value, 0f, 1f, "N2", intensity => { gtaoSettings.Intensity.value = intensity; GTAOManager.UpdateSettings(); }, gtaoSettings.Intensity.overrideState, overrideState => { gtaoSettings.Intensity.overrideState = overrideState; GTAOManager.UpdateSettings(); });
                             Slider("Power", gtaoSettings.Power.value, 1f, 8f, "N2", power => { gtaoSettings.Power.value = power; GTAOManager.UpdateSettings(); }, gtaoSettings.Power.overrideState, overrideState => { gtaoSettings.Power.overrideState = overrideState; GTAOManager.UpdateSettings(); });
                             Slider("Radius", gtaoSettings.Radius.value, 1f, 5f, "N2", radius => { gtaoSettings.Radius.value = radius; GTAOManager.UpdateSettings(); }, gtaoSettings.Radius.overrideState, overrideState => { gtaoSettings.Radius.overrideState = overrideState; GTAOManager.UpdateSettings(); });
@@ -390,17 +373,16 @@ namespace Graphics.Inspector
                     }
                 }
             }
-            if (PostProcessingSettings.AmbientOcclusionList.Amplify == AOList)
+            if (amplifyAOEnabled)
             {
                 if (AmplifyOccManager.settings != null)
                 {
                     AmplifyOccSettings amplifyOccSettings = AmplifyOccManager.settings;
-                    //GUILayout.Space(30);
-                    //ToggleAlt("Enable", amplifyOccSettings.Enabled, true, AOEnable);
-                    //ToggleAlt("Enable", amplifyOccSettings.Enabled, true, enabled => { amplifyOccSettings.Enabled = enabled; AmplifyOccManager.UpdateSettings(); });
                     if (amplifyOccSettings.Enabled)
                     {
                         GUILayout.Space(30);
+                        Label("Amplify", "", true);
+                        GUILayout.Space(10);
                         SelectionApply("Apply Method", amplifyOccSettings.ApplyMethod, apply => { amplifyOccSettings.ApplyMethod = apply; AmplifyOccManager.UpdateSettings(); }, 3);
                         SelectionNormals("PerPixel Normals", amplifyOccSettings.PerPixelNormals, normals => { amplifyOccSettings.PerPixelNormals = normals; AmplifyOccManager.UpdateSettings(); }, 4);
                         Selection("Sample Count", amplifyOccSettings.SampleCount, samples => { amplifyOccSettings.SampleCount = samples; AmplifyOccManager.UpdateSettings(); }, 4);
@@ -448,6 +430,148 @@ namespace Graphics.Inspector
                 }
             }
             GUILayout.EndVertical();
+        }
+
+        private static void DrawAmbientOcclusionSelector(PostProcessingSettings settings, ref bool legacyAOEnabled, ref bool vaoAOEnabled, ref bool gtaoAOEnabled, ref bool amplifyAOEnabled)
+        {
+            string label = LocalizationManager.HasLocalization() ? LocalizationManager.Localized("AMBIENT OCCLUSION") : "AMBIENT OCCLUSION";
+            string[] selection = Enum.GetNames(typeof(PostProcessingSettings.AmbientOcclusionList));
+            string[] localizedSelection = LocalizationManager.HasLocalization() ? selection.Select(text => LocalizationManager.Localized(text)).ToArray() : selection;
+            int columns = Mathf.Min(5, selection.Length);
+            bool isDeferredRendering = Graphics.Instance.CameraSettings.RenderingPath == CameraSettings.AIRenderingPath.Deferred;
+            bool previousEnabledState = GUI.enabled;
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(label, GUIStyles.boldlabel, GUILayout.ExpandWidth(false));
+            GUILayout.Label("", GUILayout.Width(GUIStyles.labelWidth - GUI.skin.label.CalcSize(new GUIContent(label)).x));
+
+            GUILayout.BeginVertical();
+            for (int i = 0; i < localizedSelection.Length; i += columns)
+            {
+                GUILayout.BeginHorizontal();
+                for (int j = 0; j < columns && i + j < localizedSelection.Length; j++)
+                {
+                    int index = i + j;
+                    PostProcessingSettings.AmbientOcclusionList ao = (PostProcessingSettings.AmbientOcclusionList)Enum.Parse(typeof(PostProcessingSettings.AmbientOcclusionList), selection[index]);
+                    bool isSelected = IsAmbientOcclusionSelected(ao, legacyAOEnabled, vaoAOEnabled, gtaoAOEnabled, amplifyAOEnabled);
+                    bool buttonEnabled = IsAmbientOcclusionAvailable(settings, ao, isDeferredRendering);
+
+                    GUI.enabled = previousEnabledState && buttonEnabled;
+                    bool newSelected = GUILayout.Toggle(isSelected, localizedSelection[index], "Button");
+
+                    if (ao == PostProcessingSettings.AmbientOcclusionList.None)
+                    {
+                        if (newSelected && !isSelected)
+                        {
+                            SetAmbientOcclusionEnabled(settings, PostProcessingSettings.AmbientOcclusionList.Legacy, false);
+                            SetAmbientOcclusionEnabled(settings, PostProcessingSettings.AmbientOcclusionList.VAO, false);
+                            SetAmbientOcclusionEnabled(settings, PostProcessingSettings.AmbientOcclusionList.GTAO, false);
+                            SetAmbientOcclusionEnabled(settings, PostProcessingSettings.AmbientOcclusionList.Amplify, false);
+                            legacyAOEnabled = false;
+                            vaoAOEnabled = false;
+                            gtaoAOEnabled = false;
+                            amplifyAOEnabled = false;
+                        }
+                    }
+                    else if (newSelected != isSelected)
+                    {
+                        SetAmbientOcclusionEnabled(settings, ao, newSelected);
+                        switch (ao)
+                        {
+                            case PostProcessingSettings.AmbientOcclusionList.Legacy:
+                                legacyAOEnabled = newSelected;
+                                break;
+                            case PostProcessingSettings.AmbientOcclusionList.VAO:
+                                vaoAOEnabled = newSelected;
+                                break;
+                            case PostProcessingSettings.AmbientOcclusionList.GTAO:
+                                gtaoAOEnabled = newSelected;
+                                break;
+                            case PostProcessingSettings.AmbientOcclusionList.Amplify:
+                                amplifyAOEnabled = newSelected;
+                                break;
+                        }
+                    }
+                }
+                GUILayout.EndHorizontal();
+            }
+            GUILayout.EndVertical();
+            GUI.enabled = previousEnabledState;
+
+            GUILayout.EndHorizontal();
+        }
+
+        private static bool IsAmbientOcclusionSelected(PostProcessingSettings.AmbientOcclusionList ao, bool legacyAOEnabled, bool vaoAOEnabled, bool gtaoAOEnabled, bool amplifyAOEnabled)
+        {
+            switch (ao)
+            {
+                case PostProcessingSettings.AmbientOcclusionList.None:
+                    return !legacyAOEnabled && !vaoAOEnabled && !gtaoAOEnabled && !amplifyAOEnabled;
+                case PostProcessingSettings.AmbientOcclusionList.Legacy:
+                    return legacyAOEnabled;
+                case PostProcessingSettings.AmbientOcclusionList.VAO:
+                    return vaoAOEnabled;
+                case PostProcessingSettings.AmbientOcclusionList.GTAO:
+                    return gtaoAOEnabled;
+                case PostProcessingSettings.AmbientOcclusionList.Amplify:
+                    return amplifyAOEnabled;
+                default:
+                    return false;
+            }
+        }
+
+        private static bool IsAmbientOcclusionAvailable(PostProcessingSettings settings, PostProcessingSettings.AmbientOcclusionList ao, bool isDeferredRendering)
+        {
+            switch (ao)
+            {
+                case PostProcessingSettings.AmbientOcclusionList.None:
+                    return true;
+                case PostProcessingSettings.AmbientOcclusionList.Legacy:
+                    return settings.ambientOcclusionLayer != null;
+                case PostProcessingSettings.AmbientOcclusionList.VAO:
+                    return VAOManager.settings != null;
+                case PostProcessingSettings.AmbientOcclusionList.GTAO:
+                    return GTAOManager.settings != null && isDeferredRendering;
+                case PostProcessingSettings.AmbientOcclusionList.Amplify:
+                    return AmplifyOccManager.settings != null;
+                default:
+                    return false;
+            }
+        }
+
+        private static void SetAmbientOcclusionEnabled(PostProcessingSettings settings, PostProcessingSettings.AmbientOcclusionList ao, bool enabled)
+        {
+            switch (ao)
+            {
+                case PostProcessingSettings.AmbientOcclusionList.Legacy:
+                    if (settings.ambientOcclusionLayer != null)
+                    {
+                        settings.ambientOcclusionLayer.active = enabled;
+                        settings.ambientOcclusionLayer.enabled.value = enabled;
+                    }
+                    break;
+                case PostProcessingSettings.AmbientOcclusionList.VAO:
+                    if (VAOManager.settings != null && VAOManager.settings.Enabled != enabled)
+                    {
+                        VAOManager.settings.Enabled = enabled;
+                        VAOManager.UpdateSettings();
+                    }
+                    break;
+                case PostProcessingSettings.AmbientOcclusionList.GTAO:
+                    if (GTAOManager.settings != null && GTAOManager.settings.Enabled != enabled)
+                    {
+                        GTAOManager.settings.Enabled = enabled;
+                        GTAOManager.UpdateSettings();
+                    }
+                    break;
+                case PostProcessingSettings.AmbientOcclusionList.Amplify:
+                    if (AmplifyOccManager.settings != null && AmplifyOccManager.settings.Enabled != enabled)
+                    {
+                        AmplifyOccManager.settings.Enabled = enabled;
+                        AmplifyOccManager.UpdateSettings();
+                    }
+                    break;
+            }
         }
 
         private static void DrawBloom(PostProcessingSettings settings, PostProcessingManager postprocessingManager)
@@ -894,7 +1018,7 @@ namespace Graphics.Inspector
                 {
                     GUILayout.Space(30);
 
-                    Selection("Spectral Lut", postprocessingManager.CurrentSpecLUTName, postprocessingManager.LUTSpecNames,
+                    SelectionVertical("Spectral Lut", postprocessingManager.CurrentSpecLUTName, postprocessingManager.LUTSpecNames,
                         speclut => { if (speclut != postprocessingManager.CurrentSpecLUTName) { settings.chromaticAberrationLayer.spectralLut.Override(postprocessingManager.LoadSpecLUT(speclut)); } }, 4);
                     GUILayout.Space(10);
                     Slider("Intensity", settings.chromaticAberrationLayer.intensity.value, 0f, 5f, "N2", intensity => settings.chromaticAberrationLayer.intensity.value = intensity,

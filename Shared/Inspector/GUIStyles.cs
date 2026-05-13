@@ -22,18 +22,6 @@ namespace Graphics.Inspector
         private static readonly Texture2D _sliderThumbNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
         private static readonly Texture2D _sliderThumbActiveBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
         private static readonly Texture2D _sliderThumbFocusedBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        private static readonly Texture2D _scrollHNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        private static readonly Texture2D _scrollHLNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        private static readonly Texture2D _scrollHLActiveBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        private static readonly Texture2D _scrollHRNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        private static readonly Texture2D _scrollHRActiveBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        private static readonly Texture2D _scrollVNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        private static readonly Texture2D _scrollVUNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        private static readonly Texture2D _scrollVUActiveBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        private static readonly Texture2D _scrollVDNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        private static readonly Texture2D _scrollVDActiveBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        private static readonly Texture2D _scrollHTNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        private static readonly Texture2D _scrollVTNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
         private static readonly Texture2D _toggleNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
         private static readonly Texture2D _toggleOnNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
         private static readonly Texture2D _toggleActiveBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
@@ -71,13 +59,23 @@ namespace Graphics.Inspector
         private static readonly Texture2D _selectedBoxNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
         private static readonly Texture2D _previewBoxNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
         private static readonly Texture2D _previewBoxHoverBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+        private static readonly Texture2D _vertScrollNarrow = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+        private static readonly Texture2D _horScrollNarrow = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+        private static readonly Texture2D _btnCloseNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+        private static readonly Texture2D _lighticonNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+        private static readonly Texture2D _lighticonPointNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+        private static readonly Texture2D _lighticonSpotNormalBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+        internal static readonly Texture2D _cursorTexture = new Texture2D(1, 1, TextureFormat.ARGB32, false);
 
         private static GUISkin _skin;
         public static int fontSize = 12;
         private static readonly string[] fonts = new string[] { "Lucida Grande", "Segoe UI", "Terminal" };
 
         public static GUIStyle toolbarbutton;
+        public static GUIStyle subToolbarButton;
         public static GUIStyle activestylebutton;
+        public static GUIStyle activeSubToolbarButton;
+        public static GUIStyle activeSubToolbarButtonSelected;
         public static GUIStyle boldlabel;
         public static GUIStyle colorindlabel;
         public static GUIStyle colorlabel;
@@ -109,8 +107,24 @@ namespace Graphics.Inspector
         public static GUIStyle selectedBox;
         public static GUIStyle unselectedbox;
         public static GUIStyle previewbox;
+        public static GUIStyle vertScrollNarrow;
+        public static GUIStyle vertScrollNarrowThumb;
+        public static GUIStyle lineStyle;
+        public static GUIStyle windowLabel;
+        public static GUIStyle closeButton;
+        public static GUIStyle headerStyle;
+        public static GUIStyle boxPadding;
+        public static GUIStyle rightTab;
+        public static GUIStyle addbutton;
+        public static GUIStyle lighticonDir;
+        public static GUIStyle lighticonPoint;
+        public static GUIStyle lighticonSpot;
+        public static GUIStyle lightfolder;
 
         public static float labelWidth = 150f;
+        public static int toolbarWidth = 220;
+        public static readonly Color onColor = new Color32(133, 205, 214, 255);
+        public static readonly Color normalColor = new Color32(180, 180, 180, 255);
 
         public static GUISkin Skin
         {
@@ -180,7 +194,7 @@ namespace Graphics.Inspector
             newSkin.box.alignment = TextAnchor.UpperCenter;
             newSkin.box.wordWrap = true;
             newSkin.box.richText = false;
-            newSkin.box.clipping = TextClipping.Clip;
+            newSkin.box.clipping = TextClipping.Overflow;
             newSkin.box.imagePosition = ImagePosition.ImageLeft;
             newSkin.box.contentOffset = new Vector2(0, 0);
             newSkin.box.fixedWidth = 0;
@@ -200,7 +214,7 @@ namespace Graphics.Inspector
             newSkin.window.onNormal.textColor = new Color32(180, 180, 180, 255);
             newSkin.window.border = new RectOffset(10, 10, 10, 10);
             newSkin.window.margin = new RectOffset(0, 0, 0, 0);
-            newSkin.window.padding = new RectOffset(0, 0, 20, 5);
+            newSkin.window.padding = new RectOffset(0, 0, 5, 5);
             newSkin.window.overflow = new RectOffset(8, 8, 5, 12);
             newSkin.window.font = font;
             newSkin.window.fontSize = 0;
@@ -208,7 +222,7 @@ namespace Graphics.Inspector
             newSkin.window.alignment = TextAnchor.UpperCenter;
             newSkin.window.wordWrap = false;
             newSkin.window.richText = false;
-            newSkin.window.clipping = TextClipping.Clip;
+            newSkin.window.clipping = TextClipping.Overflow;
             newSkin.window.imagePosition = ImagePosition.ImageLeft;
             newSkin.window.contentOffset = new Vector2(0, -18);
             newSkin.window.fixedWidth = 0;
@@ -257,7 +271,7 @@ namespace Graphics.Inspector
             newSkin.toggle.alignment = TextAnchor.MiddleCenter;
             newSkin.toggle.wordWrap = false;
             newSkin.toggle.richText = false;
-            newSkin.toggle.clipping = TextClipping.Clip;
+            newSkin.toggle.clipping = TextClipping.Overflow;
             newSkin.toggle.imagePosition = ImagePosition.ImageLeft;
             newSkin.toggle.contentOffset = new Vector2(0, 0);
             newSkin.toggle.fixedWidth = 0;
@@ -309,6 +323,7 @@ namespace Graphics.Inspector
             newSkin.button.stretchWidth = true;
             newSkin.button.stretchHeight = false;
             newSkin.button.fontStyle = FontStyle.Bold;
+            newSkin.button.clipping = TextClipping.Overflow;
 
             newSkin.label.normal.textColor = new Color32(180, 180, 180, 255);
             newSkin.label.hover.textColor = Color.black;
@@ -322,7 +337,7 @@ namespace Graphics.Inspector
             newSkin.label.alignment = TextAnchor.UpperLeft;
             newSkin.label.wordWrap = false;
             newSkin.label.richText = false;
-            newSkin.label.clipping = TextClipping.Clip;
+            newSkin.label.clipping = TextClipping.Overflow;
             newSkin.label.imagePosition = ImagePosition.ImageLeft;
             newSkin.label.contentOffset = new Vector2(0, 0);
             newSkin.label.fixedWidth = 0;
@@ -358,7 +373,7 @@ namespace Graphics.Inspector
             newSkin.textField.alignment = TextAnchor.MiddleLeft;
             newSkin.textField.wordWrap = false;
             newSkin.textField.richText = false;
-            newSkin.textField.clipping = TextClipping.Clip;
+            newSkin.textField.clipping = TextClipping.Overflow;
             newSkin.textField.imagePosition = ImagePosition.TextOnly;
             newSkin.textField.contentOffset = new Vector2(0, 0);
             newSkin.textField.fixedWidth = 0;
@@ -382,7 +397,7 @@ namespace Graphics.Inspector
             newSkin.horizontalSlider.wordWrap = false;
             newSkin.horizontalSlider.richText = false;
             newSkin.horizontalSlider.imagePosition = ImagePosition.ImageOnly;
-            newSkin.horizontalSlider.clipping = TextClipping.Clip;
+            newSkin.horizontalSlider.clipping = TextClipping.Overflow;
             newSkin.horizontalSlider.contentOffset = new Vector2(0, 0);
             newSkin.horizontalSlider.fixedWidth = 0f;
             newSkin.horizontalSlider.fixedHeight = 18f;
@@ -422,17 +437,14 @@ namespace Graphics.Inspector
             newSkin.horizontalSliderThumb.wordWrap = false;
             newSkin.horizontalSliderThumb.richText = false;
             newSkin.horizontalSliderThumb.imagePosition = ImagePosition.ImageOnly;
-            newSkin.horizontalSliderThumb.clipping = TextClipping.Clip;
+            newSkin.horizontalSliderThumb.clipping = TextClipping.Overflow;
             newSkin.horizontalSliderThumb.contentOffset = new Vector2(0, 0);
             newSkin.horizontalSliderThumb.fixedWidth = 10f;
             newSkin.horizontalSliderThumb.fixedHeight = 12f;
             newSkin.horizontalSliderThumb.stretchWidth = true;
             newSkin.horizontalSliderThumb.stretchHeight = false;
 
-            texData = ResourceUtils.GetEmbeddedResource("scroll horiz.png");
-            LoadImage(_scrollHNormalBackground, texData);
-            Object.DontDestroyOnLoad(_scrollHNormalBackground);
-            newSkin.horizontalScrollbar.normal.background = _scrollHNormalBackground;
+            newSkin.horizontalScrollbar.normal.background = null;
             newSkin.horizontalScrollbar.normal.textColor = Color.black;
             newSkin.horizontalScrollbar.border = new RectOffset(25, 25, 0, 0);
             newSkin.horizontalScrollbar.margin = new RectOffset(0, 0, 0, 0);
@@ -445,22 +457,19 @@ namespace Graphics.Inspector
             newSkin.horizontalScrollbar.wordWrap = false;
             newSkin.horizontalScrollbar.richText = false;
             newSkin.horizontalScrollbar.imagePosition = ImagePosition.ImageOnly;
-            newSkin.horizontalScrollbar.clipping = TextClipping.Clip;
+            newSkin.horizontalScrollbar.clipping = TextClipping.Overflow;
             newSkin.horizontalScrollbar.contentOffset = new Vector2(0, 0);
             newSkin.horizontalScrollbar.fixedWidth = 0f;
             newSkin.horizontalScrollbar.fixedHeight = 15f;
             newSkin.horizontalScrollbar.stretchWidth = true;
             newSkin.horizontalScrollbar.stretchHeight = false;
 
-            texData = ResourceUtils.GetEmbeddedResource("scroll vert.png");
-            LoadImage(_scrollVNormalBackground, texData);
-            Object.DontDestroyOnLoad(_scrollVNormalBackground);
-            newSkin.verticalScrollbar.normal.background = _scrollVNormalBackground;
+            newSkin.verticalScrollbar.normal.background = null;
             newSkin.verticalScrollbar.normal.textColor = Color.black;
-            newSkin.verticalScrollbar.border = new RectOffset(0, 0, 9, 9);
+            newSkin.verticalScrollbar.border = new RectOffset(0, 0, 0, 0);
             newSkin.verticalScrollbar.margin = new RectOffset(0, 0, 0, 0);
-            newSkin.verticalScrollbar.padding = new RectOffset(0, 0, -1, -1);
-            newSkin.verticalScrollbar.overflow = new RectOffset(0, 0, 1, 1);
+            newSkin.verticalScrollbar.padding = new RectOffset(0, 0, 0, 0);
+            newSkin.verticalScrollbar.overflow = new RectOffset(0, 0, 0, 0);
             newSkin.verticalScrollbar.font = null;
             newSkin.verticalScrollbar.fontSize = 0;
             newSkin.verticalScrollbar.fontStyle = FontStyle.Normal;
@@ -468,21 +477,21 @@ namespace Graphics.Inspector
             newSkin.verticalScrollbar.wordWrap = false;
             newSkin.verticalScrollbar.richText = false;
             newSkin.verticalScrollbar.imagePosition = ImagePosition.ImageLeft;
-            newSkin.verticalScrollbar.clipping = TextClipping.Clip;
+            newSkin.verticalScrollbar.clipping = TextClipping.Overflow;
             newSkin.verticalScrollbar.contentOffset = new Vector2(0, 0);
-            newSkin.verticalScrollbar.fixedWidth = 15f;
+            newSkin.verticalScrollbar.fixedWidth = 10f;
             newSkin.verticalScrollbar.fixedHeight = 0f;
             newSkin.verticalScrollbar.stretchWidth = true;
             newSkin.verticalScrollbar.stretchHeight = false;
 
-            texData = ResourceUtils.GetEmbeddedResource("scroll horiz thumb.png");
-            LoadImage(_scrollHTNormalBackground, texData);
-            Object.DontDestroyOnLoad(_scrollHTNormalBackground);
-            newSkin.horizontalScrollbarThumb.normal.background = _scrollHTNormalBackground;
+            texData = ResourceUtils.GetEmbeddedResource("hor narrow.png");
+            LoadImage(_horScrollNarrow, texData);
+            Object.DontDestroyOnLoad(_horScrollNarrow);
+            newSkin.horizontalScrollbarThumb.normal.background = _horScrollNarrow;
             newSkin.horizontalScrollbarThumb.normal.textColor = Color.black;
             newSkin.horizontalScrollbarThumb.border = new RectOffset(8, 8, 0, 0);
             newSkin.horizontalScrollbarThumb.margin = new RectOffset(0, 0, 0, 0);
-            newSkin.horizontalScrollbarThumb.padding = new RectOffset(8, 8, 0, 0);
+            newSkin.horizontalScrollbarThumb.padding = new RectOffset(0, 0, 0, 0);
             newSkin.horizontalScrollbarThumb.overflow = new RectOffset(0, 0, 0, 0);
             newSkin.horizontalScrollbarThumb.font = null;
             newSkin.horizontalScrollbarThumb.fontSize = 0;
@@ -491,21 +500,21 @@ namespace Graphics.Inspector
             newSkin.horizontalScrollbarThumb.wordWrap = false;
             newSkin.horizontalScrollbarThumb.richText = false;
             newSkin.horizontalScrollbarThumb.imagePosition = ImagePosition.ImageLeft;
-            newSkin.horizontalScrollbarThumb.clipping = TextClipping.Clip;
+            newSkin.horizontalScrollbarThumb.clipping = TextClipping.Overflow;
             newSkin.horizontalScrollbarThumb.contentOffset = new Vector2(0, 0);
             newSkin.horizontalScrollbarThumb.fixedWidth = 0f;
-            newSkin.horizontalScrollbarThumb.fixedHeight = 15f;
+            newSkin.horizontalScrollbarThumb.fixedHeight = 8f;
             newSkin.horizontalScrollbarThumb.stretchWidth = true;
             newSkin.horizontalScrollbarThumb.stretchHeight = false;
 
-            texData = ResourceUtils.GetEmbeddedResource("scroll vert thumb.png");
-            LoadImage(_scrollVTNormalBackground, texData);
-            Object.DontDestroyOnLoad(_scrollVTNormalBackground);
-            newSkin.verticalScrollbarThumb.normal.background = _scrollVTNormalBackground;
+            texData = ResourceUtils.GetEmbeddedResource("vert narrow.png");
+            LoadImage(_vertScrollNarrow, texData);
+            Object.DontDestroyOnLoad(_vertScrollNarrow);
+            newSkin.verticalScrollbarThumb.normal.background = _vertScrollNarrow;
             newSkin.verticalScrollbarThumb.normal.textColor = Color.black;
             newSkin.verticalScrollbarThumb.border = new RectOffset(0, 0, 8, 8);
             newSkin.verticalScrollbarThumb.margin = new RectOffset(0, 0, 0, 0);
-            newSkin.verticalScrollbarThumb.padding = new RectOffset(0, 0, 10, 10);
+            newSkin.verticalScrollbarThumb.padding = new RectOffset(0, 0, 0, 0);
             newSkin.verticalScrollbarThumb.overflow = new RectOffset(0, 0, 0, 0);
             newSkin.verticalScrollbarThumb.font = null;
             newSkin.verticalScrollbarThumb.fontSize = 0;
@@ -514,22 +523,16 @@ namespace Graphics.Inspector
             newSkin.verticalScrollbarThumb.wordWrap = false;
             newSkin.verticalScrollbarThumb.richText = false;
             newSkin.verticalScrollbarThumb.imagePosition = ImagePosition.ImageOnly;
-            newSkin.verticalScrollbarThumb.clipping = TextClipping.Clip;
+            newSkin.verticalScrollbarThumb.clipping = TextClipping.Overflow;
             newSkin.verticalScrollbarThumb.contentOffset = new Vector2(0, 0);
-            newSkin.verticalScrollbarThumb.fixedWidth = 15f;
+            newSkin.verticalScrollbarThumb.fixedWidth = 8f;
             newSkin.verticalScrollbarThumb.fixedHeight = 0f;
             newSkin.verticalScrollbarThumb.stretchWidth = false;
             newSkin.verticalScrollbarThumb.stretchHeight = true;
 
-            texData = ResourceUtils.GetEmbeddedResource("scroll horiz left.png");
-            LoadImage(_scrollHLNormalBackground, texData);
-            Object.DontDestroyOnLoad(_scrollHLNormalBackground);
-            texData = ResourceUtils.GetEmbeddedResource("scroll horiz left act.png");
-            LoadImage(_scrollHLActiveBackground, texData);
-            Object.DontDestroyOnLoad(_scrollHLActiveBackground);
-            newSkin.horizontalScrollbarLeftButton.normal.background = _scrollHLNormalBackground;
+            newSkin.horizontalScrollbarLeftButton.normal.background = null;
             newSkin.horizontalScrollbarLeftButton.normal.textColor = Color.black;
-            newSkin.horizontalScrollbarLeftButton.active.background = _scrollHLActiveBackground;
+            newSkin.horizontalScrollbarLeftButton.active.background = null;
             newSkin.horizontalScrollbarLeftButton.border = new RectOffset(0, 0, 0, 0);
             newSkin.horizontalScrollbarLeftButton.margin = new RectOffset(0, 0, 0, 0);
             newSkin.horizontalScrollbarLeftButton.padding = new RectOffset(0, 0, 0, 0);
@@ -541,22 +544,16 @@ namespace Graphics.Inspector
             newSkin.horizontalScrollbarLeftButton.wordWrap = false;
             newSkin.horizontalScrollbarLeftButton.richText = false;
             newSkin.horizontalScrollbarLeftButton.imagePosition = ImagePosition.ImageLeft;
-            newSkin.horizontalScrollbarLeftButton.clipping = TextClipping.Clip;
+            newSkin.horizontalScrollbarLeftButton.clipping = TextClipping.Overflow;
             newSkin.horizontalScrollbarLeftButton.contentOffset = new Vector2(0, 0);
-            newSkin.horizontalScrollbarLeftButton.fixedWidth = 17f;
-            newSkin.horizontalScrollbarLeftButton.fixedHeight = 15f;
+            newSkin.horizontalScrollbarLeftButton.fixedWidth = 0f;
+            newSkin.horizontalScrollbarLeftButton.fixedHeight = 0f;
             newSkin.horizontalScrollbarLeftButton.stretchWidth = true;
             newSkin.horizontalScrollbarLeftButton.stretchHeight = false;
 
-            texData = ResourceUtils.GetEmbeddedResource("scroll horiz right.png");
-            LoadImage(_scrollHRNormalBackground, texData);
-            Object.DontDestroyOnLoad(_scrollHRNormalBackground);
-            texData = ResourceUtils.GetEmbeddedResource("scroll horiz right act.png");
-            LoadImage(_scrollHRActiveBackground, texData);
-            Object.DontDestroyOnLoad(_scrollHRActiveBackground);
-            newSkin.horizontalScrollbarRightButton.normal.background = _scrollHRNormalBackground;
+            newSkin.horizontalScrollbarRightButton.normal.background = null;
             newSkin.horizontalScrollbarRightButton.normal.textColor = Color.black;
-            newSkin.horizontalScrollbarRightButton.active.background = _scrollHRActiveBackground;
+            newSkin.horizontalScrollbarRightButton.active.background = null;
             newSkin.horizontalScrollbarRightButton.border = new RectOffset(0, 0, 0, 0);
             newSkin.horizontalScrollbarRightButton.margin = new RectOffset(0, 0, 0, 0);
             newSkin.horizontalScrollbarRightButton.padding = new RectOffset(0, 0, 0, 0);
@@ -568,22 +565,16 @@ namespace Graphics.Inspector
             newSkin.horizontalScrollbarRightButton.wordWrap = false;
             newSkin.horizontalScrollbarRightButton.richText = false;
             newSkin.horizontalScrollbarRightButton.imagePosition = ImagePosition.ImageLeft;
-            newSkin.horizontalScrollbarRightButton.clipping = TextClipping.Clip;
+            newSkin.horizontalScrollbarRightButton.clipping = TextClipping.Overflow;
             newSkin.horizontalScrollbarRightButton.contentOffset = new Vector2(0, 0);
-            newSkin.horizontalScrollbarRightButton.fixedWidth = 17.24739f;
-            newSkin.horizontalScrollbarRightButton.fixedHeight = 15f;
+            newSkin.horizontalScrollbarRightButton.fixedWidth = 0f;
+            newSkin.horizontalScrollbarRightButton.fixedHeight = 0f;
             newSkin.horizontalScrollbarRightButton.stretchWidth = true;
             newSkin.horizontalScrollbarRightButton.stretchHeight = false;
 
-            texData = ResourceUtils.GetEmbeddedResource("scroll vert up.png");
-            LoadImage(_scrollVUNormalBackground, texData);
-            Object.DontDestroyOnLoad(_scrollVUNormalBackground);
-            texData = ResourceUtils.GetEmbeddedResource("scroll vert up act.png");
-            LoadImage(_scrollVUActiveBackground, texData);
-            Object.DontDestroyOnLoad(_scrollVUActiveBackground);
-            newSkin.verticalScrollbarUpButton.normal.background = _scrollVUNormalBackground;
+            newSkin.verticalScrollbarUpButton.normal.background = null;
             newSkin.verticalScrollbarUpButton.normal.textColor = Color.black;
-            newSkin.verticalScrollbarUpButton.active.background = _scrollVUActiveBackground;
+            newSkin.verticalScrollbarUpButton.active.background = null;
             newSkin.verticalScrollbarUpButton.border = new RectOffset(0, 0, 0, 0);
             newSkin.verticalScrollbarUpButton.margin = new RectOffset(0, 0, 0, 0);
             newSkin.verticalScrollbarUpButton.padding = new RectOffset(0, 0, 0, 0);
@@ -595,22 +586,16 @@ namespace Graphics.Inspector
             newSkin.verticalScrollbarUpButton.wordWrap = false;
             newSkin.verticalScrollbarUpButton.richText = false;
             newSkin.verticalScrollbarUpButton.imagePosition = ImagePosition.ImageLeft;
-            newSkin.verticalScrollbarUpButton.clipping = TextClipping.Clip;
+            newSkin.verticalScrollbarUpButton.clipping = TextClipping.Overflow;
             newSkin.verticalScrollbarUpButton.contentOffset = new Vector2(0, 0);
-            newSkin.verticalScrollbarUpButton.fixedWidth = 15f;
-            newSkin.verticalScrollbarUpButton.fixedHeight = 17f;
+            newSkin.verticalScrollbarUpButton.fixedWidth = 0f;
+            newSkin.verticalScrollbarUpButton.fixedHeight = 0f;
             newSkin.verticalScrollbarUpButton.stretchWidth = true;
             newSkin.verticalScrollbarUpButton.stretchHeight = false;
 
-            texData = ResourceUtils.GetEmbeddedResource("scroll vert down.png");
-            LoadImage(_scrollVDNormalBackground, texData);
-            Object.DontDestroyOnLoad(_scrollVDNormalBackground);
-            texData = ResourceUtils.GetEmbeddedResource("scroll vert down act.png");
-            LoadImage(_scrollVDActiveBackground, texData);
-            Object.DontDestroyOnLoad(_scrollVDActiveBackground);
-            newSkin.verticalScrollbarDownButton.normal.background = _scrollVDNormalBackground;
+            newSkin.verticalScrollbarDownButton.normal.background = null;
             newSkin.verticalScrollbarDownButton.normal.textColor = Color.black;
-            newSkin.verticalScrollbarDownButton.active.background = _scrollVDActiveBackground;
+            newSkin.verticalScrollbarDownButton.active.background = null;
             newSkin.verticalScrollbarDownButton.border = new RectOffset(0, 0, 0, 0);
             newSkin.verticalScrollbarDownButton.margin = new RectOffset(0, 0, 0, 0);
             newSkin.verticalScrollbarDownButton.padding = new RectOffset(0, 0, 0, 0);
@@ -622,10 +607,10 @@ namespace Graphics.Inspector
             newSkin.verticalScrollbarDownButton.wordWrap = false;
             newSkin.verticalScrollbarDownButton.richText = false;
             newSkin.verticalScrollbarDownButton.imagePosition = ImagePosition.ImageLeft;
-            newSkin.verticalScrollbarDownButton.clipping = TextClipping.Clip;
+            newSkin.verticalScrollbarDownButton.clipping = TextClipping.Overflow;
             newSkin.verticalScrollbarDownButton.contentOffset = new Vector2(0, 0);
-            newSkin.verticalScrollbarDownButton.fixedWidth = 15f;
-            newSkin.verticalScrollbarDownButton.fixedHeight = 17f;
+            newSkin.verticalScrollbarDownButton.fixedWidth = 0f;
+            newSkin.verticalScrollbarDownButton.fixedHeight = 0f;
             newSkin.verticalScrollbarDownButton.stretchWidth = true;
             newSkin.verticalScrollbarDownButton.stretchHeight = false;
 
@@ -645,7 +630,7 @@ namespace Graphics.Inspector
             boldlabel.alignment = TextAnchor.UpperLeft;
             boldlabel.wordWrap = false;
             boldlabel.richText = false;
-            boldlabel.clipping = TextClipping.Clip;
+            boldlabel.clipping = TextClipping.Overflow;
             boldlabel.imagePosition = ImagePosition.ImageLeft;
             boldlabel.contentOffset = new Vector2(0, 0);
             boldlabel.fixedWidth = 0;
@@ -700,56 +685,46 @@ namespace Graphics.Inspector
             colorredboldlabel.wordWrap = true;
             colorredboldlabel.normal.textColor = new Color(0.75f, 0.4f, 0.4f);
 
-            toolbarbutton = new GUIStyle
+            toolbarbutton = new GUIStyle(GUI.skin.box)
             {
                 name = "toolbarbutton"
             };
-            texData = ResourceUtils.GetEmbeddedResource("toolbar button.png");
-            LoadImage(_toolbarbtnNormalBackground, texData);
-            Object.DontDestroyOnLoad(_toolbarbtnNormalBackground);
-            texData = ResourceUtils.GetEmbeddedResource("toolbar button on.png");
-            LoadImage(_toolbarbtnOnNormalBackground, texData);
-            Object.DontDestroyOnLoad(_toolbarbtnOnNormalBackground);
-            texData = ResourceUtils.GetEmbeddedResource("toolbar button act.png");
-            LoadImage(_toolbarbtnActiveBackground, texData);
-            Object.DontDestroyOnLoad(_toolbarbtnActiveBackground);
-            texData = ResourceUtils.GetEmbeddedResource("toolbar button act on.png");
-            LoadImage(_toolbarbtnOnActiveBackground, texData);
-            Object.DontDestroyOnLoad(_toolbarbtnOnActiveBackground);
-            texData = ResourceUtils.GetEmbeddedResource("toolbar button hov.png");
-            LoadImage(_toolbarbtnHoverBackground, texData);
-            Object.DontDestroyOnLoad(_toolbarbtnHoverBackground);
             toolbarbutton.normal.background = null;
             toolbarbutton.normal.textColor = new Color32(180, 180, 180, 255);
-            toolbarbutton.hover.background = _toolbarbtnHoverBackground;
-            toolbarbutton.hover.textColor = new Color32(255, 255, 255, 255);
-            toolbarbutton.onHover.background = null;
-            toolbarbutton.onHover.textColor = new Color32(255, 255, 255, 255);
-            toolbarbutton.onNormal.background = _toolbarbtnOnNormalBackground;
-            toolbarbutton.onNormal.textColor = new Color32(180, 180, 180, 255);
-            toolbarbutton.active.background = _toolbarbtnActiveBackground;
+            toolbarbutton.hover.background = _btnActiveBackground;
+            toolbarbutton.hover.textColor = Color.white;
+            toolbarbutton.onHover.background = _btnNormalHoverBackground;
+            toolbarbutton.onHover.textColor = Color.white;
+            toolbarbutton.onNormal.background = _btnNormalBackground;
+            toolbarbutton.onNormal.textColor = new Color32(240, 240, 240, 255);
+            toolbarbutton.active.background = _btnActiveBackground;
             toolbarbutton.active.textColor = new Color32(180, 180, 180, 255);
-            toolbarbutton.onActive.background = _toolbarbtnOnActiveBackground;
+            toolbarbutton.onActive.background = _btnOnActiveBackground;
             toolbarbutton.onActive.textColor = new Color32(180, 180, 180, 255);
             toolbarbutton.focused.background = null;
-            toolbarbutton.focused.textColor = Color.black;
+            toolbarbutton.focused.textColor = new Color32(180, 180, 180, 255);
             toolbarbutton.onFocused.background = null;
             toolbarbutton.onFocused.textColor = new Color32(180, 180, 180, 255);
             toolbarbutton.border = new RectOffset(12, 12, 9, 4);
-            toolbarbutton.margin = new RectOffset(0, 0, 0, 0);
-            toolbarbutton.padding = new RectOffset(5, 5, 5, 12);
+            toolbarbutton.margin = new RectOffset(0, 10, 0, 0);
+            toolbarbutton.padding = new RectOffset(15, 10, 10, 15);
             toolbarbutton.overflow = new RectOffset(0, 1, 0, 0);
             toolbarbutton.fontStyle = FontStyle.Bold;
-            toolbarbutton.alignment = TextAnchor.MiddleCenter;
+            toolbarbutton.alignment = TextAnchor.MiddleLeft;
             toolbarbutton.wordWrap = false;
             toolbarbutton.richText = false;
-            toolbarbutton.clipping = TextClipping.Clip;
+            toolbarbutton.clipping = TextClipping.Overflow;
             toolbarbutton.imagePosition = ImagePosition.ImageLeft;
             toolbarbutton.contentOffset = new Vector2(0, 0);
             toolbarbutton.fixedWidth = 0f;
             toolbarbutton.fixedHeight = 0f;
             toolbarbutton.stretchWidth = true;
             toolbarbutton.stretchHeight = false;
+
+            subToolbarButton = new GUIStyle(toolbarbutton);
+            subToolbarButton.name = "subtoolbarButton";
+            subToolbarButton.fontStyle = FontStyle.Normal;
+            subToolbarButton.fontSize = fontSize + 2;
 
             activestylebutton = new GUIStyle(toolbarbutton);
             activestylebutton.name = "activestylebutton";
@@ -758,15 +733,33 @@ namespace Graphics.Inspector
             activestylebutton.active = toolbarbutton.onActive;
             activestylebutton.focused = toolbarbutton.onFocused;
 
+            activeSubToolbarButton = new GUIStyle(toolbarbutton);
+            activeSubToolbarButton.name = "activeSubToolbarButton";
+            activeSubToolbarButton.normal.textColor = onColor;
+            activeSubToolbarButton.fontStyle = FontStyle.Bold;
+            activeSubToolbarButton.fontSize = fontSize;
+            activeSubToolbarButton.hover.textColor = onColor;
+            activeSubToolbarButton.active.background = _btnOnActiveBackground;
+            activeSubToolbarButton.active.textColor = onColor;
+
+            activeSubToolbarButtonSelected = new GUIStyle(activestylebutton);
+            activeSubToolbarButtonSelected.name = "activeSubToolbarButtonSelected";
+            activeSubToolbarButtonSelected.normal.textColor = onColor;
+            activeSubToolbarButtonSelected.hover.textColor = onColor;
+            activeSubToolbarButtonSelected.active.textColor = onColor;
+            activeSubToolbarButtonSelected.focused.textColor = onColor;
+            activeSubToolbarButtonSelected.fontStyle = FontStyle.Bold;
+            activeSubToolbarButtonSelected.fontSize = fontSize;
+
             tabcontent = new GUIStyle
             {
                 name = "tabcontent"
             };
 
-            texData = ResourceUtils.GetEmbeddedResource("tabcontent.png");
+            texData = ResourceUtils.GetEmbeddedResource("box.png");
             LoadImage(_tabcontentNormalBackground, texData);
             Object.DontDestroyOnLoad(_tabcontentNormalBackground);
-            tabcontent.normal.background = _tabcontentNormalBackground;
+            tabcontent.normal.background = null;
             tabcontent.normal.textColor = Color.black;
             tabcontent.border = new RectOffset(3, 3, 2, 2);
             tabcontent.margin = new RectOffset(0, 0, 0, 0);
@@ -778,7 +771,7 @@ namespace Graphics.Inspector
             tabcontent.alignment = TextAnchor.UpperCenter;
             tabcontent.wordWrap = true;
             tabcontent.richText = false;
-            tabcontent.clipping = TextClipping.Clip;
+            tabcontent.clipping = TextClipping.Overflow;
             tabcontent.imagePosition = ImagePosition.ImageLeft;
             tabcontent.contentOffset = new Vector2(0, 0);
             tabcontent.fixedWidth = 0;
@@ -806,7 +799,7 @@ namespace Graphics.Inspector
             tabheader.alignment = TextAnchor.UpperCenter;
             tabheader.wordWrap = true;
             tabheader.richText = false;
-            tabheader.clipping = TextClipping.Clip;
+            tabheader.clipping = TextClipping.Overflow;
             tabheader.imagePosition = ImagePosition.ImageLeft;
             tabheader.contentOffset = new Vector2(0, 0);
             tabheader.fixedWidth = 0;
@@ -834,7 +827,7 @@ namespace Graphics.Inspector
             tabsmall.alignment = TextAnchor.UpperCenter;
             tabsmall.wordWrap = true;
             tabsmall.richText = false;
-            tabsmall.clipping = TextClipping.Clip;
+            tabsmall.clipping = TextClipping.Overflow;
             tabsmall.imagePosition = ImagePosition.ImageLeft;
             tabsmall.contentOffset = new Vector2(0, 0);
             tabsmall.fixedWidth = 0;
@@ -889,7 +882,7 @@ namespace Graphics.Inspector
             fswitch.alignment = TextAnchor.MiddleCenter;
             fswitch.wordWrap = false;
             fswitch.richText = false;
-            fswitch.clipping = TextClipping.Clip;
+            fswitch.clipping = TextClipping.Overflow;
             fswitch.imagePosition = ImagePosition.ImageLeft;
             fswitch.contentOffset = new Vector2(0, 0);
             fswitch.fixedWidth = 78;
@@ -913,7 +906,7 @@ namespace Graphics.Inspector
             switchlabel.alignment = TextAnchor.MiddleCenter;
             switchlabel.wordWrap = false;
             switchlabel.richText = false;
-            switchlabel.clipping = TextClipping.Clip;
+            switchlabel.clipping = TextClipping.Overflow;
             switchlabel.imagePosition = ImagePosition.ImageLeft;
             switchlabel.contentOffset = new Vector2(0, 0);
             switchlabel.fixedWidth = 0;
@@ -942,7 +935,7 @@ namespace Graphics.Inspector
             sliderfill.wordWrap = false;
             sliderfill.richText = false;
             sliderfill.imagePosition = ImagePosition.ImageOnly;
-            sliderfill.clipping = TextClipping.Clip;
+            sliderfill.clipping = TextClipping.Overflow;
             sliderfill.contentOffset = new Vector2(0, 0);
             sliderfill.fixedWidth = 0f;
             sliderfill.fixedHeight = 18f;
@@ -1005,7 +998,7 @@ namespace Graphics.Inspector
             tempslider.wordWrap = false;
             tempslider.richText = false;
             tempslider.imagePosition = ImagePosition.ImageOnly;
-            tempslider.clipping = TextClipping.Clip;
+            tempslider.clipping = TextClipping.Overflow;
             tempslider.contentOffset = new Vector2(0, 0);
             tempslider.fixedWidth = 0f;
             tempslider.fixedHeight = 18f;
@@ -1033,7 +1026,7 @@ namespace Graphics.Inspector
             tintslider.wordWrap = false;
             tintslider.richText = false;
             tintslider.imagePosition = ImagePosition.ImageOnly;
-            tintslider.clipping = TextClipping.Clip;
+            tintslider.clipping = TextClipping.Overflow;
             tintslider.contentOffset = new Vector2(0, 0);
             tintslider.fixedWidth = 0f;
             tintslider.fixedHeight = 18f;
@@ -1061,7 +1054,7 @@ namespace Graphics.Inspector
             vibslider.wordWrap = false;
             vibslider.richText = false;
             vibslider.imagePosition = ImagePosition.ImageOnly;
-            vibslider.clipping = TextClipping.Clip;
+            vibslider.clipping = TextClipping.Overflow;
             vibslider.contentOffset = new Vector2(0, 0);
             vibslider.fixedWidth = 0f;
             vibslider.fixedHeight = 18f;
@@ -1089,7 +1082,7 @@ namespace Graphics.Inspector
             rslider.wordWrap = false;
             rslider.richText = false;
             rslider.imagePosition = ImagePosition.ImageOnly;
-            rslider.clipping = TextClipping.Clip;
+            rslider.clipping = TextClipping.Overflow;
             rslider.contentOffset = new Vector2(0, 0);
             rslider.fixedWidth = 0f;
             rslider.fixedHeight = 18f;
@@ -1117,7 +1110,7 @@ namespace Graphics.Inspector
             gslider.wordWrap = false;
             gslider.richText = false;
             gslider.imagePosition = ImagePosition.ImageOnly;
-            gslider.clipping = TextClipping.Clip;
+            gslider.clipping = TextClipping.Overflow;
             gslider.contentOffset = new Vector2(0, 0);
             gslider.fixedWidth = 0f;
             gslider.fixedHeight = 18f;
@@ -1145,7 +1138,7 @@ namespace Graphics.Inspector
             bslider.wordWrap = false;
             bslider.richText = false;
             bslider.imagePosition = ImagePosition.ImageOnly;
-            bslider.clipping = TextClipping.Clip;
+            bslider.clipping = TextClipping.Overflow;
             bslider.contentOffset = new Vector2(0, 0);
             bslider.fixedWidth = 0f;
             bslider.fixedHeight = 18f;
@@ -1173,7 +1166,7 @@ namespace Graphics.Inspector
             aslider.wordWrap = false;
             aslider.richText = false;
             aslider.imagePosition = ImagePosition.ImageOnly;
-            aslider.clipping = TextClipping.Clip;
+            aslider.clipping = TextClipping.Overflow;
             aslider.contentOffset = new Vector2(0, 0);
             aslider.fixedWidth = 0f;
             aslider.fixedHeight = 18f;
@@ -1201,7 +1194,7 @@ namespace Graphics.Inspector
             arslider.wordWrap = false;
             arslider.richText = false;
             arslider.imagePosition = ImagePosition.ImageOnly;
-            arslider.clipping = TextClipping.Clip;
+            arslider.clipping = TextClipping.Overflow;
             arslider.contentOffset = new Vector2(0, 0);
             arslider.fixedWidth = 0f;
             arslider.fixedHeight = 18f;
@@ -1229,7 +1222,7 @@ namespace Graphics.Inspector
             hueslider.wordWrap = false;
             hueslider.richText = false;
             hueslider.imagePosition = ImagePosition.ImageOnly;
-            hueslider.clipping = TextClipping.Clip;
+            hueslider.clipping = TextClipping.Overflow;
             hueslider.contentOffset = new Vector2(0, 0);
             hueslider.fixedWidth = 0f;
             hueslider.fixedHeight = 18f;
@@ -1256,7 +1249,7 @@ namespace Graphics.Inspector
             warningbox.alignment = TextAnchor.UpperCenter;
             warningbox.wordWrap = true;
             warningbox.richText = false;
-            warningbox.clipping = TextClipping.Clip;
+            warningbox.clipping = TextClipping.Overflow;
             warningbox.imagePosition = ImagePosition.ImageLeft;
             warningbox.contentOffset = new Vector2(0, 0);
             warningbox.fixedWidth = 0;
@@ -1320,9 +1313,186 @@ namespace Graphics.Inspector
             previewbox.margin = new RectOffset(2, 2, 2, 2);
             previewbox.padding = new RectOffset(0, 0, 0, 0); // Убираем padding
 
+            vertScrollNarrow = new GUIStyle
+            {
+                name = "vertScrollNarrow"
+            };
+            texData = ResourceUtils.GetEmbeddedResource("vert narrow.png");
+            LoadImage(_vertScrollNarrow, texData);
+            Object.DontDestroyOnLoad(_vertScrollNarrow);
+            vertScrollNarrow.normal.background = null;
+            vertScrollNarrow.normal.textColor = Color.black;
+            vertScrollNarrow.border = new RectOffset(5, 4, 5, 4);
+            vertScrollNarrow.margin = new RectOffset(0, 0, 0, 0);
+            vertScrollNarrow.padding = new RectOffset(0, 0, 0, 0);
+            vertScrollNarrow.overflow = new RectOffset(0, 0, 0, 0);
+            vertScrollNarrow.imagePosition = ImagePosition.ImageOnly;
+            vertScrollNarrow.clipping = TextClipping.Overflow;
+            vertScrollNarrow.contentOffset = new Vector2(0, 0);
+            vertScrollNarrow.fixedWidth = 8f;
+            vertScrollNarrow.fixedHeight = 0f;
+            vertScrollNarrow.stretchWidth = false;
+            vertScrollNarrow.stretchHeight = true;
 
+            vertScrollNarrowThumb = new GUIStyle
+            {
+                name = "vertScrollNarrowThumb"
+            };
+            vertScrollNarrowThumb.normal.background = null;
+            vertScrollNarrowThumb.normal.textColor = Color.black;
+            vertScrollNarrowThumb.border = new RectOffset(5, 4, 5, 4);
+            vertScrollNarrowThumb.margin = new RectOffset(0, 0, 0, 0);
+            vertScrollNarrowThumb.padding = new RectOffset(0, 0, 0, 0);
+            vertScrollNarrowThumb.overflow = new RectOffset(0, 0, 0, 0);
+            vertScrollNarrowThumb.imagePosition = ImagePosition.ImageOnly;
+            vertScrollNarrowThumb.clipping = TextClipping.Overflow;
+            vertScrollNarrowThumb.contentOffset = new Vector2(0, 0);
+            vertScrollNarrowThumb.fixedWidth = 8f;
+            vertScrollNarrowThumb.fixedHeight = 0f;
+            vertScrollNarrowThumb.stretchWidth = false;
+            vertScrollNarrowThumb.stretchHeight = true;
 
-            newSkin.customStyles = new GUIStyle[] { toolbarbutton, activestylebutton, boldlabel, colorindlabel, colorlabel, boldstylelabel, newtoggle, wrapuplabel, colorredlabel, colorredboldlabel, tabcontent, tabheader, tabsmall, fswitch, switchlabel, sliderfill, lightbutton, rslider, gslider, bslider, aslider, arslider, tempslider, tintslider, vibslider, hueslider, togglealtstyle, warningbox, warningsign, selectedBox, unselectedbox, previewbox };
+            lineStyle = new GUIStyle();
+            lineStyle.normal.background = _btnActiveBackground;
+            lineStyle.margin = new RectOffset(0, 10, 4, 4);
+            lineStyle.fixedHeight = 1;
+
+            windowLabel = new GUIStyle(boldlabel);
+            windowLabel.name = "windowLabel";
+            windowLabel.margin = new RectOffset(0, 0, 5, 0);
+            windowLabel.padding = new RectOffset(0, 0, 0, 0);
+            windowLabel.alignment = TextAnchor.LowerCenter;
+
+            closeButton = new GUIStyle(newSkin.button);
+            closeButton.name = "closeButton";
+            texData = ResourceUtils.GetEmbeddedResource("btn_close.png");
+            LoadImage(_btnCloseNormalBackground, texData);
+            Object.DontDestroyOnLoad(_btnCloseNormalBackground);
+            closeButton.hover.background = _btnCloseNormalBackground;
+            closeButton.margin = new RectOffset(0, 0, 0, 0);
+            closeButton.padding = new RectOffset(0, 0, 0, 0);
+            closeButton.fixedWidth = 80f;
+            closeButton.fixedHeight = 30f;
+            closeButton.fontSize = 18;
+
+            headerStyle = new GUIStyle(GUI.skin.box);
+            headerStyle.name = "headerStyle";
+            headerStyle.margin = new RectOffset(0, 0, 0, 0);
+            headerStyle.padding = new RectOffset(10, 0, 0, 10);
+            headerStyle.normal.background = null;
+
+            boxPadding = new GUIStyle(GUI.skin.box);
+            boxPadding.name = "boxPadding";
+            boxPadding.margin = new RectOffset(0, 0, 0, 0);
+            boxPadding.padding = new RectOffset(10, 0, 0, 0);
+            boxPadding.normal.background = null;
+
+            rightTab = new GUIStyle(tabcontent);
+            rightTab.name = "rightTab";
+            rightTab.normal.background = _tabcontentNormalBackground;
+            rightTab.border = new RectOffset(0, 0, 0, 0);
+            rightTab.margin = new RectOffset(0, 0, 0, 0);
+            rightTab.padding = new RectOffset(0, 0, 0, 0);
+            rightTab.overflow = new RectOffset(0, 0, 0, 0);
+
+            lighticonDir = new GUIStyle(GUI.skin.box)
+            {
+                name = "lighticonDir"
+            };
+            texData = ResourceUtils.GetEmbeddedResource("ico_light_d.png");
+            LoadImage(_lighticonNormalBackground, texData);
+            Object.DontDestroyOnLoad(_lighticonNormalBackground);
+            lighticonDir.normal.background = _lighticonNormalBackground;
+            lighticonDir.margin = new RectOffset(0, 10, 5, 0);
+            lighticonDir.padding = new RectOffset(0, 0, 0, 0);
+            lighticonDir.fixedWidth = 32;
+            lighticonDir.fixedHeight = 32;
+
+            lighticonPoint = new GUIStyle(lighticonDir)
+            {
+                name = "lighticonPoint"
+            };
+            texData = ResourceUtils.GetEmbeddedResource("ico_light_p.png");
+            LoadImage(_lighticonPointNormalBackground, texData);
+            Object.DontDestroyOnLoad(_lighticonPointNormalBackground);
+            lighticonPoint.normal.background = _lighticonPointNormalBackground;
+
+            lighticonSpot = new GUIStyle(lighticonDir)
+            {
+                name = "lighticonSpot"
+            };
+            texData = ResourceUtils.GetEmbeddedResource("ico_light_s.png");
+            LoadImage(_lighticonSpotNormalBackground, texData);
+            Object.DontDestroyOnLoad(_lighticonSpotNormalBackground);
+            lighticonSpot.normal.background = _lighticonSpotNormalBackground;
+
+            addbutton = new GUIStyle(newSkin.button)
+            {
+                name = "addbutton",
+                margin = new RectOffset(0, 0, 0, 0),
+                padding = new RectOffset(0, 0, 0, 12),
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleCenter,
+                clipping = TextClipping.Overflow,
+                fontSize = 30
+            };
+
+            lightfolder = new GUIStyle(tabcontent)
+            {
+                name = "lightfolder"
+            };
+
+            newSkin.customStyles = new GUIStyle[]
+            {
+                toolbarbutton,
+                subToolbarButton,
+                activestylebutton,
+                activeSubToolbarButton,
+                activeSubToolbarButtonSelected,
+                boldlabel,
+                colorindlabel,
+                colorlabel,
+                boldstylelabel,
+                newtoggle,
+                wrapuplabel,
+                colorredlabel,
+                colorredboldlabel,
+                tabcontent,
+                tabheader,
+                tabsmall,
+                fswitch,
+                switchlabel,
+                sliderfill,
+                lightbutton,
+                rslider,
+                gslider,
+                bslider,
+                aslider,
+                arslider,
+                tempslider,
+                tintslider,
+                vibslider,
+                hueslider,
+                togglealtstyle,
+                warningbox,
+                warningsign,
+                selectedBox,
+                unselectedbox,
+                previewbox,
+                vertScrollNarrow,
+                vertScrollNarrowThumb,
+                lineStyle,
+                windowLabel,
+                closeButton,
+                headerStyle,
+                boxPadding,
+                rightTab,
+                addbutton,
+                lighticonDir,
+                lighticonPoint,
+                lighticonSpot,
+                lightfolder
+            };
 
             newSkin.settings.doubleClickSelectsWord = true;
             newSkin.settings.tripleClickSelectsLine = true;

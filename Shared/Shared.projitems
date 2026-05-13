@@ -10,6 +10,20 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)Resources\blueNoiseSSR64.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\spot.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\box2.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\btn_close.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\hor narrow.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\vert narrow.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\ico_light_d.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\ico_light_p.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\ico_light_s.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\icon_camera_vsmall.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\icon_camera_vsmall2.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\icon_toolbar_big.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\resize_cursor.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\tabcontent2.png" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\dof.png" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\bordertex.png" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\warningboxbg.png" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\warningbg.png" />
@@ -47,7 +61,6 @@
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\toolbar button foc.png" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\icon_camera.png" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\icon_camera_small.png" />
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\UI\icon_camera_vsmall.png" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\Noise Textures\LDR_RGBA_0.png" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\Noise Textures\LDR_RGBA_1.png" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\Noise Textures\LDR_RGBA_10.png" />
@@ -126,6 +139,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Hooks\CreatePngScreenController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Inspector\ReflectionProbeInspector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Inspector\ScreenshotInspector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Managers\AmplifyOcclusionManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Managers\AuraManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Managers\ConnectSunToUnderwaterManager.cs" />
@@ -246,6 +260,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Setting\PostProcessingValues.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Setting\SSSSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\ColorUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\CookieTextureManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\CustomShadowResolutionHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\DebugUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\LoadingAnimation.cs" />
@@ -337,6 +352,7 @@
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\defref.unity3d" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\loading.unity3d" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\temporalscreen.unity3d" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\spot_cookies.unity3d" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\fsr3upscaler.unity3d">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>

@@ -37,6 +37,9 @@ namespace Graphics
             yield return null;
             yield return null;
 
+            CookieTextureManager.InitializeSharedManager();
+            yield return new WaitUntil(CookieTextureManager.IsManagerReady);
+
             if (operation == SceneOperationKind.Import)
             {
                 // Copy over light settings from the newly imported lights

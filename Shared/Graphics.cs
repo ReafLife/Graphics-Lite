@@ -1,31 +1,36 @@
 using BepInEx;
 using BepInEx.Configuration;
-using Graphics.GTAO;
+using FidelityFX;
 using Graphics.AmplifyOcclusion;
 using Graphics.VAO;
 using Graphics.CTAA;
+using Graphics.FSR3;
+using Graphics.GlobalFog;
+using Graphics.GTAO;
 using Graphics.Hooks;
-using Graphics.SEGI;
 using Graphics.Inspector;
 using Graphics.Patch;
+using Graphics.SEGI;
 using Graphics.Settings;
-using Graphics.Textures;
-using Graphics.GlobalFog;
+using Graphics.VAO;
 using KKAPI;
 using KKAPI.Chara;
 using KKAPI.Studio.SaveLoad;
+using KKAPI.Studio.UI.Toolbars;
 using KKAPI.Utilities;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using static Graphics.DebugUtils;
 using UnityEngine.Rendering;
 using Graphics.FSR3;
 using System.Reflection;
 using FidelityFX;
+using Aura2API;
 using UnityEngine.Rendering.PostProcessing;
-using System.Collections.Generic;
+using UnityEngine.SceneManagement;
+using static Graphics.DebugUtils;
 
 namespace Graphics
 {
@@ -39,7 +44,7 @@ namespace Graphics
     {
         public const string GUID = "ore.graphics";
         public const string PluginName = "Graphics";
-        public const string Version = "2.3.0";
+        public const string Version = "2.6.0";
 
         public enum ShadowResolutionOverride
         {
@@ -72,6 +77,7 @@ namespace Graphics
         public static ConfigEntry<bool> ScreenshotOverride { get; internal set; }
         public static ConfigEntry<ShadowResolutionOverride> customShadowResolutionOverride { get; internal set; }
         public static ConfigEntry<ShadowCascadesOverride> customShadowCascadesOverride { get; internal set; }
+
         public static ConfigEntry<bool> loadSkybox { get; internal set; }
         public static ConfigEntry<bool> loadSEGI { get; internal set; }
         public static ConfigEntry<bool> loadSSS { get; internal set; }
@@ -115,6 +121,8 @@ namespace Graphics
         private FocusManager _focusManager;
         private AuraManager _auraManager;
         private FilmGrainManager _filmGrainManager;
+        private SimpleToolbarToggle _toolbarButton;
+        private SimpleToolbarToggle _toolbarButton1;
 #if AI
         //do nothing
 #else
@@ -122,7 +130,9 @@ namespace Graphics
 #endif
         private TemporalScreenshotManager _temporalScreenshotManager;
         private Inspector.Inspector _inspector;
-        private HoohSmartphoneScanner smartphoneScanner;
+
+        //DOFToggle
+        private bool _dofEnabled = true;
 
         //DOFToggle
         private bool _dofEnabled = true;
@@ -137,6 +147,9 @@ namespace Graphics
         internal BepInEx.Logging.ManualLogSource Log => Logger;
 
         public static Graphics Instance { get; private set; }
+        public static ConfigEntry<ShadowResolutionOverride> CustomShadowResolutionOverride => customShadowResolutionOverride;
+        public static ConfigEntry<ShadowCascadesOverride> CustomShadowCascadesOverride => customShadowCascadesOverride;
+        public static ConfigEntry<bool> ScreenshotAlphaMaskMSAA => alphaMaskMSAA;
 
         public Graphics()
         {
@@ -165,9 +178,15 @@ namespace Graphics
             Inspector.Inspector.StartOffsetX = ConfigWindowOffsetX.Value;
             ConfigWindowOffsetY = Config.Bind("UI", "Window Position Offset Y", (Screen.height - ConfigWindowHeight.Value) / 2, new ConfigDescription("Window Position Offset Y"));
             Inspector.Inspector.StartOffsetY = ConfigWindowOffsetY.Value;
-            ScreenshotOverride = Config.Bind("Screenshot Settings", "Enable New Screenshot Engine.", true, new ConfigDescription("Override Screenshot Manager Render function with Temporal Screenshot for CTAA compatibility. (Must disable Alpha in Screenshot Manager)"));
+            ScreenshotOverride = Config.Bind("Screenshot Settings", "Enable New Screenshot Engine.", true, new ConfigDescription("Override Screenshot Manager render functions with Temporal Screenshot for CTAA compatibility and alpha-mask captures."));
             customShadowResolutionOverride = Config.Bind("Screenshot Settings", "ShadowResolutionOverride", ShadowResolutionOverride.NoOverride, "Override shadow resolution (0 = no override)");
             customShadowCascadesOverride = Config.Bind("Screenshot Settings", "ShadowCascadesOverride", ShadowCascadesOverride.NoOverride, "Override shadow cascades (5 = no override)");
+            alphaMaskMSAA = Config.Bind("Screenshot Settings", "Alpha Mask MSAA", true, new ConfigDescription("Enable MSAA for the alpha mask render texture when transparent screenshots are enabled."));
+            ScreenshotFullScreenSEGI = Config.Bind("Screenshot Settings", "Fullscreen SEGI", true, new ConfigDescription("Disable SEGI half resolution while rendering a screenshot."));
+            ScreenshotFullScreenSSS = Config.Bind("Screenshot Settings", "Fullscreen SSS", true, new ConfigDescription("Set SSS downscale factor to 1.0 while rendering a screenshot."));
+            ScreenshotCTAASupersampling = Config.Bind("Screenshot Settings", "CTAA Supersampling", false, new ConfigDescription("Auto set supersampling mode to CINA_ULTRA while rendering a screenshot."));
+            ScreenshotHiResReflectionProbes = Config.Bind("Screenshot Settings", "Hi-Res Reflection Probes", true, new ConfigDescription("Raise realtime reflection probe resolution while rendering a screenshot."));
+            ScreenshotHiResSSR = Config.Bind("Screenshot Settings", "Hi-Res SSR", true, new ConfigDescription("Raise SSR quality while rendering a screenshot."));
 
             loadSkybox = Config.Bind("Preset Filters", "Load Preset Skybox", false, new ConfigDescription("Load Preset Skybox"));
             loadSEGI = Config.Bind("Preset Filters", "Load Preset SEGI", false, new ConfigDescription("Load Preset SEGI"));
@@ -190,12 +209,38 @@ namespace Graphics
             StudioSaveLoadApi.RegisterExtraBehaviour<SceneController>(GUID);
             SceneManager.sceneLoaded += OnSceneLoaded;
             StudioHooks.Map_OnLoadAfter();
-
             TemporalScreenshotManager.Hooks.PatchScreenshotManager();
             if (KKAPI.Studio.StudioAPI.InsideStudio)
-                CreatePngScreenController.Hooks.PatchCreatePngScreenController();
-
+            CreatePngScreenController.Hooks.PatchCreatePngScreenController();
             CreatePngScreenController.Hooks.PatchCreatePngController();
+
+            _dofEnabled = ConfigDoFEnableOnStart.Value;
+            // PostProcessVolumes are loaded, so the cache would be populated with
+            // an empty array [] and every future toggle would silently do nothing.
+            // The correct call is in Start() after the preset loads (see below).
+
+            _toolbarButton = new SimpleToolbarToggle(
+                "Graphics",
+                "Open Graphics Inspector window. Hotkey: " + ConfigShortcut.Value,
+                () => ResourceUtils.GetEmbeddedResource("icon_camera_vsmall.png").LoadTexture(),
+                false,
+                this,
+                val => Show = val);
+            ToolbarManager.AddLeftToolbarControl(_toolbarButton);
+
+            _toolbarButton1 = new SimpleToolbarToggle(
+                "DoF Toggle",
+                "Toggle Depth of Field. Hotkey: " + ConfigDoFShortcut.Value,
+                () => ResourceUtils.GetEmbeddedResource("dof.png").LoadTexture(),
+                _dofEnabled,
+                this,
+                active =>
+                {
+                    _dofEnabled = active;
+                    ApplyDoFState(_dofEnabled);
+                    Log.LogInfo($"DoF Toggle: {_dofEnabled}");
+                });
+            ToolbarManager.AddLeftToolbarControl(_toolbarButton1);
         }
 
         private IEnumerator Start()
@@ -216,7 +261,7 @@ namespace Graphics
             _postProcessingManager = Instance.GetOrAddComponent<PostProcessingManager>();
             _postProcessingManager.Parent = this;
             _postProcessingManager.LensDirtTexturesPath = ConfigLensDirtPath.Value;
-           
+
             DontDestroyOnLoad(_postProcessingManager);
 
 #if AI
@@ -327,27 +372,11 @@ namespace Graphics
 
             if (KKAPI.Studio.StudioAPI.InsideStudio)
             {
-                _dofEnabled = ConfigDoFEnableOnStart.Value;
-                ApplyDoFState(_dofEnabled);
-
-                // Add Graphics Toolbar Button
                 Texture2D gIconTex = new Texture2D(32, 32);
                 byte[] texData = ResourceUtils.GetEmbeddedResource("icon_camera_vsmall.png");
                 ImageConversion.LoadImage(gIconTex, texData);
-
-                // Add DOF Toggle Button
-                Texture2D dofIconTex = new Texture2D(32, 32);
-                byte[] dofTexData = ResourceUtils.GetEmbeddedResource("dof.png");
-                ImageConversion.LoadImage(dofIconTex, dofTexData);
-
                 studioToolbarToggle = KKAPI.Studio.UI.CustomToolbarButtons.AddLeftToolbarToggle(gIconTex, false, active => {
                     Show = active;
-                });
-
-                dofToolbarButton = KKAPI.Studio.UI.CustomToolbarButtons.AddLeftToolbarToggle(dofIconTex, _dofEnabled, active => {
-                    _dofEnabled = active;
-                    ApplyDoFState(_dofEnabled);
-                    Log.LogInfo($"DoF Toggle: {_dofEnabled}");
                 });
             }
 
@@ -358,7 +387,6 @@ namespace Graphics
             }
         }
 
-        internal KKAPI.Studio.UI.ToolbarToggle studioToolbarToggle;
         internal SkyboxManager SkyboxManager => _skyboxManager;
         internal PostProcessingManager PostProcessingManager => _postProcessingManager;
         internal LightManager LightManager => _lightManager;
@@ -388,7 +416,7 @@ namespace Graphics
                 GUISkin originalSkin = GUI.skin;
                 GUI.skin = GUIStyles.Skin;
                 _inspector.DrawWindow();
-                GUI.skin = originalSkin;                
+                GUI.skin = originalSkin;
             }
 
             if (Event.current?.type == EventType.KeyDown && ConfigShortcut.Value == Event.current?.keyCode)
@@ -508,21 +536,7 @@ namespace Graphics
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-            }
-
-            // DoF Toggle Hotkey
-            if (ConfigDoFShortcut.Value.IsDown())
-            {
-                _dofEnabled = !_dofEnabled;
-                ApplyDoFState(_dofEnabled);
-
-                if (dofToolbarButton != null && KKAPI.Studio.StudioAPI.InsideStudio)
-                {
-                    dofToolbarButton.Value = _dofEnabled;
-                }
-
-                Log.LogInfo($"DoF Hotkey Pressed: {_dofEnabled}");
-            }
+            }           
         }
 
         internal void LateUpdate()
@@ -531,7 +545,7 @@ namespace Graphics
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-            }           
+            }
         }
 
         internal bool IsStudio()
@@ -562,7 +576,8 @@ namespace Graphics
         private bool realtimeReflectionPulseCoroutineRunning = false;
         internal void StartPulseRealtimeReflectionCoroutine()
         {
-            if (!realtimeReflectionPulseCoroutineRunning) {                
+            if (!realtimeReflectionPulseCoroutineRunning)
+            {
                 StartCoroutine(DoRealtimeReflectionPulse());
                 realtimeReflectionPulseCoroutineRunning = true;
             }
@@ -579,18 +594,17 @@ namespace Graphics
                 yield return null;
                 yield return null;
                 QualitySettings.realtimeReflectionProbes = false;
-                yield return new WaitForSeconds(ReflectionProbesPulseTimer);                
+                yield return new WaitForSeconds(ReflectionProbesPulseTimer);
             }
             realtimeReflectionPulseCoroutineRunning = false;
         }
 
         public void ToggleGUI()
         {
-            if (studioToolbarToggle == null)
+            if (_toolbarButton == null)
                 Show = !Show;
             else
-                //studioToolbarToggle.Toggled.OnNext(!studioToolbarToggle.Toggled.Value);
-                Show = !Show;
+                _toolbarButton.Toggled.OnNext(!_toolbarButton.Toggled.Value);
         }
 
         public bool Show
@@ -626,7 +640,7 @@ namespace Graphics
                             Cursor.visible = _previousCursorVisible;
                         }
                     }
-                    
+
                     _showGUI = value;
                 }
             }

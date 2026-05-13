@@ -3,7 +3,6 @@ using Graphics.SEGI;
 using Graphics.Settings;
 using UnityEngine;
 using static Graphics.Inspector.Util;
-using KKAPI;
 
 namespace Graphics.Inspector
 {
@@ -144,28 +143,6 @@ namespace Graphics.Inspector
                     }
 
                 }
-
-                TemporalScreenshotTool tst = Graphics.Instance.CameraSettings.MainCamera.GetOrAddComponent<TemporalScreenshotTool>();
-                GUILayout.Space(25);
-                Label("SCREENSHOT SETTINGS", "", true);
-                GUILayout.Space(10);
-                Slider("Warmup Frames", tst.warmupFrames, 1, 60, frames => tst.warmupFrames = frames);
-                GUILayout.Space(10);
-                Selection("Shadow Cascades Override", Graphics.customShadowCascadesOverride.Value, cascades => Graphics.customShadowCascadesOverride.Value = cascades);
-                Selection("Shadow Resolution Override", Graphics.customShadowResolutionOverride.Value, resolution => Graphics.customShadowResolutionOverride.Value = resolution);
-                if (Graphics.customShadowResolutionOverride.Value > Graphics.ShadowResolutionOverride._8192)
-                {
-                    Warning("High shadow resolutions can cause crash on low VRAM!");
-                    GUILayout.Space(10);
-                }
-
-                GUILayout.Space(5);
-                ToggleWithText("Fullscreen SEGI", tst.captureSEGIfullscreen, "Disable SEGI 'half resolution' while rendering screenshot.", false, segifullscreen => tst.captureSEGIfullscreen = segifullscreen);
-                ToggleWithText("CTAA Supersampling", tst.enableCTAASuperSampling, "Auto set Supersampling mode to CINA_ULTRA while render screenshot (F11). Screenshot Manager supersampling value ignored for CTAA.", false, segifullscreen => tst.enableCTAASuperSampling = segifullscreen);
-                //ToggleWithText("Hi-Res NGSS", tst.highQualityNGSS, "Set the highest NGSS sampling settings while renderings screenshot.", false, hqs => tst.highQualityNGSS = hqs);
-                ToggleWithText("Hi-Res Reflection Probes", tst.highResReflectionProbes, "Set max (2048) resolution for all realtime reflection probes while rendering screenshot.", false, hrp => tst.highResReflectionProbes = hrp);
-                ToggleWithText("Hi-Res SSR", tst.highResSSR, "Set highest resolution for 'Legacy SSR' or 'Stochastic SSR' while rendering screenshot.", false, hrs => tst.highResSSR = hrs);
-                //ToggleWithText("Hi-Res Volumetrics", tst.highQualityVolumetrics, "Set full resolution to Volumetric Renderer & max sample count fot each enabled volumetric light while rendering screenshot.", false, hqv => tst.highQualityVolumetrics = hqv);
 
                 if (DecalsSystemManager.settings != null)
                 {

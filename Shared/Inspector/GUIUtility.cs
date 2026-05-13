@@ -112,6 +112,57 @@ namespace Graphics.Inspector
             }
         }
 
+        internal static void LightIntensity(
+            string label,
+            float value,
+            float min,
+            ref float max,
+            string format,
+            Action<float> onChanged = null,
+            bool enable = true,
+            Action<bool> onChangedEnable = null,
+            int spacing = 0)
+        {
+            GUILayout.BeginHorizontal();
+
+            EnableToggle(label, ref spacing, ref enable, onChangedEnable);
+
+            bool previousEnabledState = GUI.enabled;
+            if (!enable)
+                GUI.enabled = false;
+
+            float newValue = GUILayout.HorizontalSlider(value, min, max);
+            if (GUILayout.Button("-", GUILayout.Width(30), GUILayout.ExpandHeight(false)))
+            {
+                float newMax = Mathf.Max(min, max - 100f);
+                if (newMax < max)
+                {
+                    max = newMax;
+                    newValue = Mathf.Clamp(newValue, min, max);
+                }
+            }
+
+            string valueString = newValue.ToString(format);
+            string newValueString = GUILayout.TextField(valueString, GUILayout.Width(GUIStyles.fontSize * 3f), GUILayout.ExpandWidth(false));
+
+            if (newValueString != valueString && float.TryParse(newValueString, out float parseResult))
+            {
+                newValue = Mathf.Clamp(parseResult, min, max);
+            }
+
+            if (GUILayout.Button("+", GUILayout.Width(30), GUILayout.ExpandHeight(false)))
+            {
+                max += 100f;
+                newValue = Mathf.Clamp(newValue, min, max);
+            }
+
+            GUILayout.EndHorizontal();
+            GUI.enabled = previousEnabledState;
+
+            if (onChanged != null && !Mathf.Approximately(value, newValue))
+                onChanged(newValue);
+        }
+
         internal static void SliderAlpha(string label, float value, float min, float max, string format, bool reverse = false, Action<float> onChanged = null, bool enable = true, Action<bool> onChangedEnable = null)
         {
             GUILayout.BeginHorizontal();
@@ -1041,6 +1092,44 @@ namespace Graphics.Inspector
             return selected;
         }
 
+        internal static T SelectionVertical<T>(string label, T selected, T[] selection, Action<T> onChanged = null, int columns = -1, bool enable = true, Action<bool> onChangedEnable = null)
+        {
+            GUILayout.BeginVertical();
+            int spacing = 0;
+            EnableToggle(label, ref spacing, ref enable, onChangedEnable);
+            if (!enable)
+            {
+                GUI.enabled = false;
+            }
+
+            string[] selectionString = selection.Select(entry => entry.ToString()).ToArray();
+            string[] localizedSelection = LocalizationManager.HasLocalization() ? selectionString.Select(text => LocalizationManager.Localized(text)).ToArray() : selectionString;
+            int currentIndex = Array.IndexOf(selection, selected);
+
+            if (-1 == columns)
+            {
+                int inspectorWidth = Inspector.Width - 200;
+                int adaptiveColumns = Mathf.Max(1, inspectorWidth / 300);
+                columns = Mathf.Min(adaptiveColumns, selection.Length);
+            }
+
+            int selectedIndex = GUILayout.SelectionGrid(currentIndex, localizedSelection, columns);
+            if (!enable)
+            {
+                GUI.enabled = true;
+            }
+
+            GUILayout.EndVertical();
+            if (selectedIndex == currentIndex)
+            {
+                return selected;
+            }
+
+            selected = (T)selection.GetValue(selectedIndex);
+            onChanged?.Invoke(selected);
+            return selected;
+        }
+
         public static TEnum MultiSelection<TEnum>(string label, TEnum selected, System.Action<TEnum> onChanged = null, int columns = -1) where TEnum : System.Enum
         {
             bool previousEnabledState = GUI.enabled;
@@ -1334,10 +1423,6 @@ namespace Graphics.Inspector
             if (-1 == columns)
             {
                 columns = Mathf.Min(adaptiveColumns, selection.Length);
-            }
-            else
-            {
-                columns = Mathf.Min(adaptiveColumns, columns);
             }
 
             bool isDeferredRendering = Graphics.Instance.CameraSettings.RenderingPath == CameraSettings.AIRenderingPath.Deferred;
@@ -1861,6 +1946,11 @@ namespace Graphics.Inspector
             }
 
             return UseButton ? GUILayout.Toggle(toggle, label, GUIStyles.lightbutton) : GUILayout.Toggle(toggle, label);
+        }
+
+        internal static bool LightButton(string label, bool toggle, int maxLength = 54)
+        {
+            return LightButton(label, toggle, true, maxLength);
         }
 
         internal static bool Button(string label, bool ExpandWidth = false)

@@ -50,6 +50,18 @@ namespace Graphics
             public static int sc;
             public static int limitFrames;
 
+            private static void ApplyQualitySettings()
+            {
+                if (TemporalScreenshotInstance == null)
+                    return;
+
+                TemporalScreenshotInstance.captureSEGIfullscreen = Graphics.ScreenshotFullScreenSEGI.Value;
+                TemporalScreenshotInstance.highResSSS = Graphics.ScreenshotFullScreenSSS.Value;
+                TemporalScreenshotInstance.enableCTAASuperSampling = Graphics.ScreenshotCTAASupersampling.Value;
+                TemporalScreenshotInstance.highResReflectionProbes = Graphics.ScreenshotHiResReflectionProbes.Value;
+                TemporalScreenshotInstance.highResSSR = Graphics.ScreenshotHiResSSR.Value;
+            }
+
             public static void GetDimensions(out Vector2Int _screenshotResolution, out int _supersampling)
             {
                 if (PluginInstance == null)
@@ -275,6 +287,9 @@ namespace Graphics
                     }
                 }
 
+                TemporalScreenshotInstance.enableCharacterMask = AlphaEnabled();
+                TemporalScreenshotInstance.enableMaskMSAA = Graphics.ScreenshotAlphaMaskMSAA.Value;
+                ApplyQualitySettings();
                 TemporalScreenshotInstance.MakeScreenshot();
 
                 while (TemporalScreenshotInstance.cameraRenderTarget != null)
@@ -320,7 +335,7 @@ namespace Graphics
                 //Graphics.Instance.Log.LogInfo("TakeRenderScreenshot_Prefix.");
                 if (PluginInstance == null)
                     PluginInstance = Traverse.Create(__instance);
-                if (!Graphics.ScreenshotOverride.Value || AlphaEnabled())
+                if (!Graphics.ScreenshotOverride.Value)
                     return true; // Don't override
                 __result = TakeRenderScreenshot_Hook(__instance);
                 return false;
@@ -331,7 +346,7 @@ namespace Graphics
                 //Graphics.Instance.Log.LogInfo("WaitForEndOfFrameThen_Prefix.");
                 if (PluginInstance == null)
                     PluginInstance = Traverse.Create(__instance);
-                if (!Graphics.ScreenshotOverride.Value || AlphaEnabled())
+                if (!Graphics.ScreenshotOverride.Value)
                     return true; // Don't override
                 if (a.Method.Name == "<Update>b__60_1" || a.Method.Name == "<Update>b__60_2")
                 {
@@ -346,9 +361,8 @@ namespace Graphics
                 if (PluginInstance == null)
                     PluginInstance = Traverse.Create(__instance);
 
-                // Проверяем, включен ли override
-                if (!Graphics.ScreenshotOverride.Value || AlphaEnabled())
-                    return true; // Используем оригинальный метод
+                if (!Graphics.ScreenshotOverride.Value)
+                    return true;
 
                 var fmt = alpha ? RenderTextureFormat.ARGB32 : RenderTextureFormat.Default;
                 var rt = RenderTexture.GetTemporary(width, height, 32, fmt, RenderTextureReadWrite.Default);

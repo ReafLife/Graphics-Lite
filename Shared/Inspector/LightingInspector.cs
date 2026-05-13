@@ -76,7 +76,7 @@ namespace Graphics.Inspector
                 else
                 {
                     cubeMapScrollView = GUILayout.BeginScrollView(cubeMapScrollView, GUILayout.MaxHeight(400));
-                    int selectedCubeMapIdx = GUILayout.SelectionGrid(skyboxManager.CurrentTextureIndex, skyboxManager.Previews.ToArray(), Inspector.Width / 130, SelBox);
+                    int selectedCubeMapIdx = GUILayout.SelectionGrid(skyboxManager.CurrentTextureIndex, skyboxManager.Previews.ToArray(), Mathf.Max(1, (Inspector.Width - GUIStyles.toolbarWidth) / 130), SelBox);
                     if (-1 != selectedCubeMapIdx)
                     {
                         skyboxManager.CurrentTexturePath = skyboxManager.TexturePaths[selectedCubeMapIdx];
