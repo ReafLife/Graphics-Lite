@@ -2,7 +2,6 @@ using BepInEx;
 using BepInEx.Configuration;
 using FidelityFX;
 using Graphics.AmplifyOcclusion;
-using Graphics.VAO;
 using Graphics.CTAA;
 using Graphics.FSR3;
 using Graphics.GlobalFog;
@@ -24,10 +23,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Graphics.FSR3;
-using System.Reflection;
-using FidelityFX;
-using Aura2API;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
 using static Graphics.DebugUtils;
@@ -77,7 +72,12 @@ namespace Graphics
         public static ConfigEntry<bool> ScreenshotOverride { get; internal set; }
         public static ConfigEntry<ShadowResolutionOverride> customShadowResolutionOverride { get; internal set; }
         public static ConfigEntry<ShadowCascadesOverride> customShadowCascadesOverride { get; internal set; }
-
+        public static ConfigEntry<bool> alphaMaskMSAA { get; internal set; }
+        public static ConfigEntry<bool> ScreenshotFullScreenSEGI { get; internal set; }
+        public static ConfigEntry<bool> ScreenshotCTAASupersampling { get; internal set; }
+        public static ConfigEntry<bool> ScreenshotHiResReflectionProbes { get; internal set; }
+        public static ConfigEntry<bool> ScreenshotHiResSSR { get; internal set; }
+        public static ConfigEntry<bool> ScreenshotFullScreenSSS { get; internal set; }
         public static ConfigEntry<bool> loadSkybox { get; internal set; }
         public static ConfigEntry<bool> loadSEGI { get; internal set; }
         public static ConfigEntry<bool> loadSSS { get; internal set; }
@@ -130,13 +130,10 @@ namespace Graphics
 #endif
         private TemporalScreenshotManager _temporalScreenshotManager;
         private Inspector.Inspector _inspector;
+        private HoohSmartphoneScanner smartphoneScanner;
 
         //DOFToggle
         private bool _dofEnabled = true;
-
-        //DOFToggle
-        private bool _dofEnabled = true;
-        private KKAPI.Studio.UI.ToolbarToggle dofToolbarButton;
 
         internal GlobalSettings Settings { get; private set; }
         internal CameraSettings CameraSettings { get; private set; }
@@ -211,7 +208,7 @@ namespace Graphics
             StudioHooks.Map_OnLoadAfter();
             TemporalScreenshotManager.Hooks.PatchScreenshotManager();
             if (KKAPI.Studio.StudioAPI.InsideStudio)
-            CreatePngScreenController.Hooks.PatchCreatePngScreenController();
+                CreatePngScreenController.Hooks.PatchCreatePngScreenController();
             CreatePngScreenController.Hooks.PatchCreatePngController();
 
             _dofEnabled = ConfigDoFEnableOnStart.Value;
@@ -370,16 +367,6 @@ namespace Graphics
 
             LogWithDots("Graphics", "ONLINE");
 
-            if (KKAPI.Studio.StudioAPI.InsideStudio)
-            {
-                Texture2D gIconTex = new Texture2D(32, 32);
-                byte[] texData = ResourceUtils.GetEmbeddedResource("icon_camera_vsmall.png");
-                ImageConversion.LoadImage(gIconTex, texData);
-                studioToolbarToggle = KKAPI.Studio.UI.CustomToolbarButtons.AddLeftToolbarToggle(gIconTex, false, active => {
-                    Show = active;
-                });
-            }
-
             // Straight 2 Maker Support Fix
             if (KKAPI.Maker.MakerAPI.InsideMaker)
             {
@@ -536,7 +523,18 @@ namespace Graphics
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-            }           
+            }
+
+            if (ConfigDoFShortcut.Value.IsDown())
+            {
+                _dofEnabled = !_dofEnabled;
+                ApplyDoFState(_dofEnabled);
+
+                if (_toolbarButton1 != null && KKAPI.Studio.StudioAPI.InsideStudio)
+                    _toolbarButton1.Toggled.OnNext(_dofEnabled);
+
+                Log.LogInfo($"DoF Hotkey Pressed: {_dofEnabled}");
+            }
         }
 
         internal void LateUpdate()
