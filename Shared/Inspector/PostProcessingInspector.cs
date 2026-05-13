@@ -304,7 +304,7 @@ namespace Graphics.Inspector
                         {
                             Label("", "", true);
                             Label("Rendering Mode: DEFERRED", "", true);
-                            Selection("Cmd Buffer Integration", vaoSettings.VaoCameraEvent, vaocameraevent => { vaoSettings.VaoCameraEvent = vaocameraevent; VAOManager.UpdateSettings(); });
+                            SelectionVertical("Cmd Buffer Integration", vaoSettings.VaoCameraEvent, vaocameraevent => { vaoSettings.VaoCameraEvent = vaocameraevent; VAOManager.UpdateSettings(); });
                             ToggleAlt("G-Buffer Depth & Normals", vaoSettings.UseGBuffer.value, true, usegbuffer => { vaoSettings.UseGBuffer.value = usegbuffer; VAOManager.UpdateSettings(); });
                         }
                         Selection("Far Plane Source", vaoSettings.FarPlaneSource, farplanesource => { vaoSettings.FarPlaneSource = farplanesource; VAOManager.UpdateSettings(); });
@@ -1221,7 +1221,7 @@ namespace Graphics.Inspector
                     Slider("Start Distance", globalfogSettings.startDistance.value, 1f, 100f, "N0", start => { globalfogSettings.startDistance.value = start; GlobalFogManager.UpdateSettings(); });
 
                     SliderColor("Fog Color", globalfogSettings.fogColor, colour => { globalfogSettings.fogColor = colour; GlobalFogManager.UpdateSettings(); });
-                    Selection("Fog Mode", globalfogSettings.fogMode, mode => { globalfogSettings.fogMode = mode; GlobalFogManager.UpdateSettings(); });
+                    SelectionVertical("Fog Mode", globalfogSettings.fogMode, mode => { globalfogSettings.fogMode = mode; GlobalFogManager.UpdateSettings(); });
                 }
 
                 GUILayout.EndVertical();

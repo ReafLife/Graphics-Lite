@@ -167,7 +167,7 @@ namespace Graphics.Inspector
                 GUILayout.Space(25);
                 Label("UI", "", true);
                 GUILayout.Space(1);
-                Selection("Language", LocalizationManager.CurrentLanguage, language => LocalizationManager.CurrentLanguage = language);
+                Selection("Language", LocalizationManager.CurrentLanguage, language => LocalizationManager.CurrentLanguage = language, 2);
                 Slider("Font Size", renderingSettings.FontSize, 12, 24, size => renderingSettings.FontSize = size);
                 Slider("Window Width", Inspector.Width, 400, Screen.width / 2, size => Inspector.Width = size);
                 Slider("Window Height", Inspector.Height, 400, Screen.height, size => Inspector.Height = size);

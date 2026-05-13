@@ -69,7 +69,7 @@ namespace Graphics.Inspector
                 GUILayout.Space(30);
                 Label("QUALITY SETTINGS", "", true);
                 GUILayout.Space(10);
-                Selection("Shadow Cascades Override", Graphics.CustomShadowCascadesOverride.Value, cascades => Graphics.CustomShadowCascadesOverride.Value = cascades);
+                Selection("Shadow Cascades Override", Graphics.CustomShadowCascadesOverride.Value, cascades => Graphics.CustomShadowCascadesOverride.Value = cascades, 2);
                 Selection("Shadow Resolution Override", Graphics.CustomShadowResolutionOverride.Value, resolution => Graphics.CustomShadowResolutionOverride.Value = resolution);
                 if (Graphics.CustomShadowResolutionOverride.Value > Graphics.ShadowResolutionOverride._4096)
                 {

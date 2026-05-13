@@ -116,7 +116,7 @@ namespace Graphics.Inspector
             string label,
             float value,
             float min,
-            ref float max,
+            ref float max,  // ← ключевое изменение: по ссылке
             string format,
             Action<float> onChanged = null,
             bool enable = true,
@@ -125,40 +125,46 @@ namespace Graphics.Inspector
         {
             GUILayout.BeginHorizontal();
 
+            // Включатель/выключатель
             EnableToggle(label, ref spacing, ref enable, onChangedEnable);
 
             bool previousEnabledState = GUI.enabled;
             if (!enable)
                 GUI.enabled = false;
 
+            // Слайдер
             float newValue = GUILayout.HorizontalSlider(value, min, max);
             if (GUILayout.Button("-", GUILayout.Width(30), GUILayout.ExpandHeight(false)))
             {
                 float newMax = Mathf.Max(min, max - 100f);
-                if (newMax < max)
+                if (newMax < max) // чтобы не пытаться уменьшать, если max == min
                 {
                     max = newMax;
                     newValue = Mathf.Clamp(newValue, min, max);
                 }
             }
-
+            // Текстовое поле
             string valueString = newValue.ToString(format);
             string newValueString = GUILayout.TextField(valueString, GUILayout.Width(GUIStyles.fontSize * 3f), GUILayout.ExpandWidth(false));
 
-            if (newValueString != valueString && float.TryParse(newValueString, out float parseResult))
+            if (newValueString != valueString)
             {
-                newValue = Mathf.Clamp(parseResult, min, max);
+                if (float.TryParse(newValueString, out float parseResult))
+                {
+                    newValue = Mathf.Clamp(parseResult, min, max);
+                }
             }
 
             if (GUILayout.Button("+", GUILayout.Width(30), GUILayout.ExpandHeight(false)))
             {
                 max += 100f;
-                newValue = Mathf.Clamp(newValue, min, max);
+                newValue = Mathf.Clamp(newValue, min, max); // гарантируем валидность
             }
 
             GUILayout.EndHorizontal();
             GUI.enabled = previousEnabledState;
 
+            // Вызываем callback, только если значение *изменилось*
             if (onChanged != null && !Mathf.Approximately(value, newValue))
                 onChanged(newValue);
         }
@@ -398,10 +404,6 @@ namespace Graphics.Inspector
                 onChanged(newValue);
             }
 
-            //if (!enable)
-            //{
-            //    GUI.enabled = true;
-            //}
         }
 
         internal static void SliderCompact(string label, float value, float min, float max, string format, Action<float> onChanged = null, bool enable = true, Action<bool> onChangedEnable = null)
@@ -479,8 +481,6 @@ namespace Graphics.Inspector
         internal static void SliderColor(string label, Color value, Action<Color> onChanged = null,
             bool useColorDisplayColor32 = false, bool enable = true, Action<bool> onChangedEnable = null, string colourGradingName = "", float mincolourGrading = 0, float maxcolourGrading = 1)
         {
-            //GUIStyle colorind = new GUIStyle(GUI.skin.label);
-            //colorind.contentOffset = new Vector2(5, 10);
             GUIStyle colorind = GUIStyles.colorindlabel;
 
             GUILayout.BeginHorizontal();
@@ -494,7 +494,7 @@ namespace Graphics.Inspector
 
             GUI.color = new Color(value.r, value.g, value.b, 1f);
             GUILayout.Label(colourIndicator, colorind);
-            //GUILayout.Label("", GUILayout.Width(GUIStyles.labelWidth - GUI.skin.label.CalcSize(new GUIContent(label)).x - spacing));
+
             GUI.color = Color.white;
 
             GUILayout.EndHorizontal();
@@ -543,8 +543,6 @@ namespace Graphics.Inspector
         internal static void SliderColorVertical(string label, Color value, Action<Color> onChanged = null,
             bool useColorDisplayColor32 = false, bool enable = true, Action<bool> onChangedEnable = null, string colourGradingName = "", float mincolourGrading = 0, float maxcolourGrading = 1)
         {
-            //GUIStyle colorind = new GUIStyle(GUI.skin.label);
-            //colorind.contentOffset = new Vector2(5, 10);
             GUIStyle colorind = GUIStyles.colorindlabel;
 
             GUILayout.BeginHorizontal();
@@ -558,7 +556,7 @@ namespace Graphics.Inspector
 
             GUI.color = new Color(value.r, value.g, value.b, 1f);
             GUILayout.Label(colourIndicator, colorind);
-            //GUILayout.Label("", GUILayout.Width(GUIStyles.labelWidth - GUI.skin.label.CalcSize(new GUIContent(label)).x - spacing));
+
             GUI.color = Color.white;
 
             GUILayout.EndHorizontal();
@@ -607,12 +605,6 @@ namespace Graphics.Inspector
         internal static float SliderColorR(string label, float value, int spacing, float min = 0.0f, float max = 1.0f, bool RGB = true)
         {
             float labelmar = (GUIStyles.labelWidth) - 60;
-            /*GUIStyle Colorlabel = new GUIStyle(GUI.skin.label);
-            Colorlabel.padding = new RectOffset(0, 0, 0, 0);
-            Colorlabel.margin = new RectOffset(0, 0, 0, 0);
-            Colorlabel.normal.background = null;
-            Colorlabel.alignment = TextAnchor.MiddleLeft;
-            Colorlabel.fixedWidth = 60;*/
             GUIStyle Colorlabel = GUIStyles.colorlabel;
 
             GUILayout.BeginHorizontal();
@@ -642,12 +634,6 @@ namespace Graphics.Inspector
         internal static float SliderColorG(string label, float value, int spacing, float min = 0.0f, float max = 1.0f, bool RGB = true)
         {
             float labelmar = (GUIStyles.labelWidth) - 60;
-            /*GUIStyle Colorlabel = new GUIStyle(GUI.skin.label);
-            Colorlabel.padding = new RectOffset(0, 0, 0, 0);
-            Colorlabel.margin = new RectOffset(0, 0, 0, 0);
-            Colorlabel.normal.background = null;
-            Colorlabel.alignment = TextAnchor.MiddleLeft;
-            Colorlabel.fixedWidth = 60;*/
             GUIStyle Colorlabel = GUIStyles.colorlabel;
 
             GUILayout.BeginHorizontal();
@@ -677,12 +663,6 @@ namespace Graphics.Inspector
         internal static float SliderColorB(string label, float value, int spacing, float min = 0.0f, float max = 1.0f, bool RGB = true)
         {
             float labelmar = (GUIStyles.labelWidth) - 60;
-            /*GUIStyle Colorlabel = new GUIStyle(GUI.skin.label);
-            Colorlabel.padding = new RectOffset(0, 0, 0, 0);
-            Colorlabel.margin = new RectOffset(0, 0, 0, 0);
-            Colorlabel.normal.background = null;
-            Colorlabel.alignment = TextAnchor.MiddleLeft;
-            Colorlabel.fixedWidth = 60;*/
             GUIStyle Colorlabel = GUIStyles.colorlabel;
 
             GUILayout.BeginHorizontal();
@@ -712,12 +692,6 @@ namespace Graphics.Inspector
         internal static float SliderColorA(string label, float value, int spacing, float min = 0.0f, float max = 1.0f, bool RGB = true)
         {
             float labelmar = (GUIStyles.labelWidth) - 60;
-            /*GUIStyle Colorlabel = new GUIStyle(GUI.skin.label);
-            Colorlabel.padding = new RectOffset(0, 0, 0, 0);
-            Colorlabel.margin = new RectOffset(0, 0, 0, 0);
-            Colorlabel.normal.background = null;
-            Colorlabel.alignment = TextAnchor.MiddleLeft;
-            Colorlabel.fixedWidth = 60;*/
             GUIStyle Colorlabel = GUIStyles.colorlabel;
 
             GUILayout.BeginHorizontal();
@@ -747,12 +721,6 @@ namespace Graphics.Inspector
         internal static byte SliderColorR(string label, byte value, int spacing)
         {
             float labelmar = (GUIStyles.labelWidth) - 60;
-            /*GUIStyle Colorlabel = new GUIStyle(GUI.skin.label);
-            Colorlabel.padding = new RectOffset(0, 0, 0, 0);
-            Colorlabel.margin = new RectOffset(0, 0, 0, 0);
-            Colorlabel.normal.background = null;
-            Colorlabel.alignment = TextAnchor.MiddleLeft;
-            Colorlabel.fixedWidth = 60;*/
             GUIStyle Colorlabel = GUIStyles.colorlabel;
 
             GUILayout.BeginHorizontal();
@@ -781,12 +749,6 @@ namespace Graphics.Inspector
         internal static byte SliderColorG(string label, byte value, int spacing)
         {
             float labelmar = (GUIStyles.labelWidth) - 60;
-            /*GUIStyle Colorlabel = new GUIStyle(GUI.skin.label);
-            Colorlabel.padding = new RectOffset(0, 0, 0, 0);
-            Colorlabel.margin = new RectOffset(0, 0, 0, 0);
-            Colorlabel.normal.background = null;
-            Colorlabel.alignment = TextAnchor.MiddleLeft;
-            Colorlabel.fixedWidth = 60;*/
             GUIStyle Colorlabel = GUIStyles.colorlabel;
 
             GUILayout.BeginHorizontal();
@@ -815,12 +777,6 @@ namespace Graphics.Inspector
         internal static byte SliderColorB(string label, byte value, int spacing)
         {
             float labelmar = (GUIStyles.labelWidth) - 60;
-            /*GUIStyle Colorlabel = new GUIStyle(GUI.skin.label);
-            Colorlabel.padding = new RectOffset(0, 0, 0, 0);
-            Colorlabel.margin = new RectOffset(0, 0, 0, 0);
-            Colorlabel.normal.background = null;
-            Colorlabel.alignment = TextAnchor.MiddleLeft;
-            Colorlabel.fixedWidth = 60;*/
             GUIStyle Colorlabel = GUIStyles.colorlabel;
 
             GUILayout.BeginHorizontal();
@@ -849,12 +805,6 @@ namespace Graphics.Inspector
         internal static float SliderColorVerticalR(string label, float value, int spacing, float min = 0.0f, float max = 1.0f, bool RGB = true)
         {
             float labelmar = (GUIStyles.labelWidth) - 60;
-            /*GUIStyle Colorlabel = new GUIStyle(GUI.skin.label);
-            Colorlabel.padding = new RectOffset(0, 0, 0, 0);
-            Colorlabel.margin = new RectOffset(0, 0, 0, 0);
-            Colorlabel.normal.background = null;
-            Colorlabel.alignment = TextAnchor.MiddleLeft;
-            Colorlabel.fixedWidth = 60;*/
             GUIStyle Colorlabel = GUIStyles.colorlabel;
 
             GUILayout.BeginVertical();
@@ -884,12 +834,6 @@ namespace Graphics.Inspector
         internal static float SliderColorVerticalG(string label, float value, int spacing, float min = 0.0f, float max = 1.0f, bool RGB = true)
         {
             float labelmar = (GUIStyles.labelWidth) - 60;
-            /*GUIStyle Colorlabel = new GUIStyle(GUI.skin.label);
-            Colorlabel.padding = new RectOffset(0, 0, 0, 0);
-            Colorlabel.margin = new RectOffset(0, 0, 0, 0);
-            Colorlabel.normal.background = null;
-            Colorlabel.alignment = TextAnchor.MiddleLeft;
-            Colorlabel.fixedWidth = 60;*/
             GUIStyle Colorlabel = GUIStyles.colorlabel;
 
             GUILayout.BeginVertical();
@@ -919,12 +863,6 @@ namespace Graphics.Inspector
         internal static float SliderColorVerticalB(string label, float value, int spacing, float min = 0.0f, float max = 1.0f, bool RGB = true)
         {
             float labelmar = (GUIStyles.labelWidth) - 60;
-            /*GUIStyle Colorlabel = new GUIStyle(GUI.skin.label);
-            Colorlabel.padding = new RectOffset(0, 0, 0, 0);
-            Colorlabel.margin = new RectOffset(0, 0, 0, 0);
-            Colorlabel.normal.background = null;
-            Colorlabel.alignment = TextAnchor.MiddleLeft;
-            Colorlabel.fixedWidth = 60;*/
             GUIStyle Colorlabel = GUIStyles.colorlabel;
 
             GUILayout.BeginVertical();
@@ -954,12 +892,6 @@ namespace Graphics.Inspector
         internal static byte SliderColorVerticalR(string label, byte value, int spacing)
         {
             float labelmar = (GUIStyles.labelWidth) - 60;
-            /*GUIStyle Colorlabel = new GUIStyle(GUI.skin.label);
-            Colorlabel.padding = new RectOffset(0, 0, 0, 0);
-            Colorlabel.margin = new RectOffset(0, 0, 0, 0);
-            Colorlabel.normal.background = null;
-            Colorlabel.alignment = TextAnchor.MiddleLeft;
-            Colorlabel.fixedWidth = 60;*/
             GUIStyle Colorlabel = GUIStyles.colorlabel;
 
             GUILayout.BeginHorizontal();
@@ -968,7 +900,6 @@ namespace Graphics.Inspector
                 GUILayout.Label("", GUILayout.Width(spacing));
             }
             label = LocalizationManager.HasLocalization() ? LocalizationManager.Localized(label) : label;
-            //GUILayout.Label("", GUILayout.Width(labelmar));
             GUILayout.Label(label, Colorlabel, GUILayout.ExpandWidth(false));
 
             byte newValue = (byte)HorizontalRedSlider(value, 0, 255);
@@ -988,12 +919,6 @@ namespace Graphics.Inspector
         internal static byte SliderColorVerticalG(string label, byte value, int spacing)
         {
             float labelmar = (GUIStyles.labelWidth) - 60;
-            /*GUIStyle Colorlabel = new GUIStyle(GUI.skin.label);
-            Colorlabel.padding = new RectOffset(0, 0, 0, 0);
-            Colorlabel.margin = new RectOffset(0, 0, 0, 0);
-            Colorlabel.normal.background = null;
-            Colorlabel.alignment = TextAnchor.MiddleLeft;
-            Colorlabel.fixedWidth = 60;*/
             GUIStyle Colorlabel = GUIStyles.colorlabel;
 
             GUILayout.BeginHorizontal();
@@ -1002,7 +927,6 @@ namespace Graphics.Inspector
                 GUILayout.Label("", GUILayout.Width(spacing));
             }
             label = LocalizationManager.HasLocalization() ? LocalizationManager.Localized(label) : label;
-            //GUILayout.Label("", GUILayout.Width(labelmar));
             GUILayout.Label(label, Colorlabel, GUILayout.ExpandWidth(false));
 
             byte newValue = (byte)HorizontalGreenSlider(value, 0, 255);
@@ -1022,12 +946,6 @@ namespace Graphics.Inspector
         internal static byte SliderColorVerticalB(string label, byte value, int spacing)
         {
             float labelmar = (GUIStyles.labelWidth) - 60;
-            /*GUIStyle Colorlabel = new GUIStyle(GUI.skin.label);
-            Colorlabel.padding = new RectOffset(0, 0, 0, 0);
-            Colorlabel.margin = new RectOffset(0, 0, 0, 0);
-            Colorlabel.normal.background = null;
-            Colorlabel.alignment = TextAnchor.MiddleLeft;
-            Colorlabel.fixedWidth = 60;*/
             GUIStyle Colorlabel = GUIStyles.colorlabel;
 
             GUILayout.BeginHorizontal();
@@ -1036,7 +954,6 @@ namespace Graphics.Inspector
                 GUILayout.Label("", GUILayout.Width(spacing));
             }
             label = LocalizationManager.HasLocalization() ? LocalizationManager.Localized(label) : label;
-            //GUILayout.Label("", GUILayout.Width(labelmar));
             GUILayout.Label(label, Colorlabel, GUILayout.ExpandWidth(false));
 
             byte newValue = (byte)HorizontalBlueSlider(value, 0, 255);
@@ -1070,8 +987,8 @@ namespace Graphics.Inspector
             if (-1 == columns)
             {
                 // Adaptive
-                float inspectorWidth = Inspector.Width;
-                int adaptiveColumns = Mathf.Max(1, Mathf.FloorToInt(inspectorWidth / 300f));
+                int inspectorWidth = Inspector.Width - 200;
+                int adaptiveColumns = Mathf.Max(1, (inspectorWidth / 300));
                 columns = Mathf.Min(adaptiveColumns, selection.Length);
             }
 
@@ -1108,8 +1025,9 @@ namespace Graphics.Inspector
 
             if (-1 == columns)
             {
+                // Adaptive
                 int inspectorWidth = Inspector.Width - 200;
-                int adaptiveColumns = Mathf.Max(1, inspectorWidth / 300);
+                int adaptiveColumns = Mathf.Max(1, (inspectorWidth / 300));
                 columns = Mathf.Min(adaptiveColumns, selection.Length);
             }
 
@@ -1264,10 +1182,10 @@ namespace Graphics.Inspector
             {
                 columns = Mathf.Min(adaptiveColumns, selection.Length);
             }
-            else
-            {
-                columns = Mathf.Min(adaptiveColumns, columns);
-            }
+            //else
+            //{
+            //    columns = Mathf.Min(adaptiveColumns, columns);
+            //}
 
             int selectedIndex = GUILayout.SelectionGrid(currentIndex, localizedSelection, columns);
             GUILayout.EndVertical();
@@ -1424,6 +1342,10 @@ namespace Graphics.Inspector
             {
                 columns = Mathf.Min(adaptiveColumns, selection.Length);
             }
+            else
+            {
+                columns = Mathf.Min(adaptiveColumns, columns);
+            }
 
             bool isDeferredRendering = Graphics.Instance.CameraSettings.RenderingPath == CameraSettings.AIRenderingPath.Deferred;
 
@@ -1534,7 +1456,7 @@ namespace Graphics.Inspector
 
         internal static TEnum SelectionAO<TEnum>(string label, TEnum selected, Action<TEnum> onChanged = null, int columns = -1, bool enable = true, Action<bool> onChangedEnable = null) where TEnum : Enum
         {
-            GUILayout.BeginHorizontal();
+            GUILayout.BeginVertical();
 
             int spacing = 0;
             int adaptiveColumns = Inspector.adaptiveColumns;
@@ -1552,10 +1474,6 @@ namespace Graphics.Inspector
             if (-1 == columns)
             {
                 columns = Mathf.Min(adaptiveColumns, selection.Length);
-            }
-            else
-            {
-                columns = Mathf.Min(adaptiveColumns, columns);
             }
 
             bool isDeferredRendering = Graphics.Instance.CameraSettings.RenderingPath == CameraSettings.AIRenderingPath.Deferred;
@@ -1589,7 +1507,7 @@ namespace Graphics.Inspector
                         onChanged?.Invoke(selected);
                     }
                 }
-                GUILayout.EndHorizontal();
+                GUILayout.EndVertical();
             }
             GUILayout.EndVertical();
             GUI.enabled = true;
@@ -1609,10 +1527,11 @@ namespace Graphics.Inspector
                 GUI.enabled = false;
             }
 
+            GUILayout.EndHorizontal();
             //if (-1 == columns)
             //{
-            float inspectorWidth = Inspector.Width;
-            int adaptiveColumns = Mathf.Max(1, Mathf.FloorToInt((inspectorWidth - (space + 300)) / 72f));
+            int inspectorWidth = Inspector.Width;
+            int adaptiveColumns = Mathf.Max(1, ((inspectorWidth - 300) / 72));
             int columns = Mathf.Min(adaptiveColumns, selection.Length);
             //}
 
@@ -1621,8 +1540,6 @@ namespace Graphics.Inspector
             {
                 GUI.enabled = true;
             }
-
-            GUILayout.EndHorizontal();
             return selectedIndex;
         }
 
@@ -1664,7 +1581,8 @@ namespace Graphics.Inspector
             int newMask = cullingMask;
             GUILayout.BeginVertical();
             GUILayout.Label(label, GUILayout.ExpandWidth(false));
-            GUILayout.Label("", GUILayout.Width(GUIStyles.labelWidth - GUI.skin.label.CalcSize(new GUIContent(label)).x));
+            //GUILayout.Label("", GUILayout.Width(GUIStyles.labelWidth - GUI.skin.label.CalcSize(new GUIContent(label)).x));
+            GUILayout.Space(10);
             int included = 0;
             GUILayout.BeginVertical();
             for (int i = 0; i < CullingMaskExtensions.Layers.Count; i++)
@@ -1716,13 +1634,7 @@ namespace Graphics.Inspector
             int currentIndex = Array.IndexOf(enumNames, selected.ToString());
 
             GUIStyle buttonStyle = GUIStyles.toolbarbutton;
-            /*GUIStyle activeButtonStyle = new GUIStyle(buttonStyle)
-            {
-                normal = buttonStyle.onNormal,
-                hover = buttonStyle.onHover,
-                active = buttonStyle.onActive,
-                focused = buttonStyle.onFocused
-            };*/
+
             GUIStyle activeButtonStyle = GUIStyles.activestylebutton;
 
             float[] buttonWidths = new float[displayNames.Length];
@@ -1768,7 +1680,7 @@ namespace Graphics.Inspector
         internal static void Toggle(string label, bool toggle, bool bold = false, Action<bool> onChanged = null)
         {
             label = LocalizationManager.HasLocalization() ? LocalizationManager.Localized(label) : label;
-            GUILayout.BeginHorizontal(GUIStyles.togglealtstyle);
+            GUILayout.BeginHorizontal();
             if (bold)
             {
                 GUILayout.Label(label, GUIStyles.boldlabel, GUILayout.ExpandWidth(false));
@@ -1790,38 +1702,20 @@ namespace Graphics.Inspector
         internal static void ToggleAlt(string label, bool toggle, bool bold = false, Action<bool> onChanged = null)
         {
             label = LocalizationManager.HasLocalization() ? LocalizationManager.Localized(label) : label;
-            GUIStyle togglealt = GUIStyles.togglealtstyle;
+            //GUIStyle togglealt = GUIStyles.togglealtstyle;
 
-            GUILayout.BeginHorizontal(togglealt);
-            GUIStyle togglestyle = GUIStyles.newtoggle;
+            GUILayout.BeginHorizontal();
+            //GUIStyle togglestyle = GUIStyles.newtoggle;
             //Draw checkbox
-            bool newToggle = GUILayout.Toggle(toggle, "", togglestyle, GUILayout.Width(20)); // Checkbox width
+            bool newToggle = GUILayout.Toggle(toggle, ""); // Checkbox width
 
             //Draw label
             if (bold)
             {
-                /*GUIStyle boldStyle = new GUIStyle(GUI.skin.label)
-                {
-                    fontStyle = FontStyle.Bold,
-                    border = new RectOffset(7, 7, 7, 7),
-                    //margin = new RectOffset(4, 4, 6, 6),
-                    padding = new RectOffset(0, 0, 5, 7),
-                    overflow = new RectOffset(0, 0, 0, 0)
-                };*/
-
                 GUILayout.Label(label, GUIStyles.boldlabel, GUILayout.ExpandWidth(true));
             }
             else
             {
-                /*GUIStyle normalStyle = new GUIStyle(GUI.skin.label)
-                {
-                    fontStyle = FontStyle.Normal,
-                    border = new RectOffset(7, 7, 7, 7),
-                    //margin = new RectOffset(4, 4, 6, 6),
-                    padding = new RectOffset(0, 0, 5, 7),
-                    overflow = new RectOffset(0, 0, 0, 0)
-                };*/
-
                 GUILayout.Label(label, GUILayout.ExpandWidth(true));
             }
 
@@ -1847,26 +1741,11 @@ namespace Graphics.Inspector
             // Draw main label
             if (bold)
             {
-                /*GUIStyle boldStyle = new GUIStyle(GUI.skin.label)
-                {
-                    fontStyle = FontStyle.Bold,
-                    border = new RectOffset(7, 7, 7, 7),
-                    padding = new RectOffset(0, 0, 5, 7),
-                    overflow = new RectOffset(0, 0, 0, 0)
-                };*/
                 GUIStyle boldStyle = GUIStyles.boldstylelabel;
                 GUILayout.Label(label, boldStyle, GUILayout.ExpandWidth(false));
             }
             else
             {
-                /*GUIStyle normalStyle = new GUIStyle(GUI.skin.label)
-                {
-                    fontStyle = FontStyle.Normal,
-                    border = new RectOffset(7, 7, 7, 7),
-                    padding = new RectOffset(0, 0, 5, 7),
-                    overflow = new RectOffset(0, 0, 0, 0)
-                };*/
-                //GUIStyle normalStyle = GUIStyles.normalstylelabel;
                 GUILayout.Label(label, GUILayout.ExpandWidth(false));
             }
 
@@ -1876,8 +1755,7 @@ namespace Graphics.Inspector
             // Draw right text if provided
             if (!string.IsNullOrEmpty(rightText))
             {
-                /*GUIStyle textStyle = new GUIStyle(GUI.skin.label);
-                textStyle.wordWrap = true;*/
+
                 GUIStyle textStyle = GUIStyles.wrapuplabel;
 
                 float maxTextWidth = Inspector.Width - 200;
@@ -1892,20 +1770,8 @@ namespace Graphics.Inspector
             }
         }
 
-        internal static void Switch(/*int fontsize, */string label, bool toggle, bool bold = true, Action<bool> onChanged = null)
+        internal static void Switch(string label, bool toggle, bool bold = true, Action<bool> onChanged = null)
         {
-            //GUIStyle featureSwitch = GUIStyles.fswitch;
-            //featureSwitch.fixedWidth = fontsize * 4.91f;
-            //featureSwitch.fixedHeight = fontsize * 2.5f;
-
-            //GUIStyle switchlabel = GUIStyles.switchlabel;
-            //switchlabel.margin = new RectOffset(0, 0, 0, 0); //newSkin.label.margin;
-            //switchlabel.alignment = TextAnchor.MiddleCenter;
-            //switchlabel.fixedWidth = 0;
-            //switchlabel.fixedHeight = fontsize * 2.5f;
-            //switchlabel.stretchWidth = true;
-            //switchlabel.stretchHeight = true;
-
             label = LocalizationManager.HasLocalization() ? LocalizationManager.Localized(label) : label;
 
             GUILayout.BeginHorizontal();
@@ -1926,7 +1792,6 @@ namespace Graphics.Inspector
             }
 
             GUILayout.EndHorizontal();
-
         }
 
         internal static bool ToggleButton(string label, bool toggle, bool UseButton = false)
@@ -1948,18 +1813,13 @@ namespace Graphics.Inspector
             return UseButton ? GUILayout.Toggle(toggle, label, GUIStyles.lightbutton) : GUILayout.Toggle(toggle, label);
         }
 
-        internal static bool LightButton(string label, bool toggle, int maxLength = 54)
-        {
-            return LightButton(label, toggle, true, maxLength);
-        }
-
         internal static bool Button(string label, bool ExpandWidth = false)
         {
             label = LocalizationManager.HasLocalization() ? LocalizationManager.Localized(label) : label;
             return GUILayout.Button(label, GUILayout.ExpandWidth(ExpandWidth));
         }
 
-        internal static void Label(string label, string text, bool bold = false)
+        internal static void Label(string label, string text, bool bold = false, bool boldtext = false)
         {
             label = LocalizationManager.HasLocalization() ? LocalizationManager.Localized(label) : label;
             if (0 < text.Length) text = LocalizationManager.HasLocalization() ? LocalizationManager.Localized(text) : text;
@@ -1976,9 +1836,7 @@ namespace Graphics.Inspector
             GUILayout.Label("", GUILayout.Width(GUIStyles.labelWidth - GUI.skin.label.CalcSize(new GUIContent(label)).x));
 
             // Создаем стиль с переносом текста
-            /*GUIStyle textStyle = new GUIStyle(GUI.skin.label);
-            textStyle.wordWrap = true;*/
-            GUIStyle textStyle = GUIStyles.wrapuplabel;
+            GUIStyle textStyle = boldtext ? GUIStyles.boldlabel : GUIStyles.wrapuplabel;
 
             GUILayout.Label(text, textStyle, GUILayout.MaxWidth(Inspector.maxTextWidth));
             GUILayout.EndHorizontal();
@@ -2288,85 +2146,15 @@ namespace Graphics.Inspector
                 enable = newEnable;
             }
         }
-        internal static void TextInt(string label, int Integer, Action<int> onChanged = null, bool enable = true, Action<bool> onChangedEnable = null)
-        {
-            GUILayout.BeginHorizontal();
-            //int spacing = 0;
 
-            int.TryParse(GUILayout.TextField(Integer.ToString()), out int count);
-            if (!enable)
-            {
-                GUI.enabled = true;
-            }
-
-            GUILayout.EndHorizontal();
-            if (onChanged != null && Integer != count)
-            {
-                onChanged(count);
-            }
-        }
-
-        internal static void TextFloat(string label, float Float, string format = "N0", Action<float> onChanged = null, bool enable = true, Action<bool> onChangedEnable = null)
-        {
-            GUILayout.BeginHorizontal();
-            //int spacing = 0;
-
-            float.TryParse(GUILayout.TextField(Float.ToString(format)), out float count);
-            if (!enable)
-            {
-                GUI.enabled = true;
-            }
-
-            GUILayout.EndHorizontal();
-            if (onChanged != null && Float != count)
-            {
-                onChanged(count);
-            }
-        }
-
-        internal static void Label1(string label, string text, bool bold = false)
-        {
-            label = LocalizationManager.HasLocalization() ? LocalizationManager.Localized(label) : label;
-            if (0 < text.Length) text = LocalizationManager.HasLocalization() ? LocalizationManager.Localized(text) : text;
-            GUILayout.BeginHorizontal();
-            if (bold)
-            {
-                GUILayout.Label(label, GUIStyles.boldlabel);
-            }
-            else
-            {
-                GUILayout.Label(label);
-            }
-            GUILayout.Label("");
-            GUILayout.Label(text);
-            GUILayout.EndHorizontal();
-        }
-        internal static void Label2(string label, string text, bool bold = false)
-        {
-            label = LocalizationManager.HasLocalization() ? LocalizationManager.Localized(label) : label;
-            if (0 < text.Length) text = LocalizationManager.HasLocalization() ? LocalizationManager.Localized(text) : text;
-            GUILayout.BeginHorizontal();
-            if (bold)
-            {
-                GUILayout.Label(label, GUIStyles.boldlabel, GUILayout.ExpandWidth(false));
-            }
-            else
-            {
-                GUILayout.Label(label, GUILayout.ExpandWidth(false));
-            }
-            GUILayout.Label("", GUILayout.Width(GUIStyles.labelWidth - GUI.skin.label.CalcSize(new GUIContent(label)).x - 50));
-            GUILayout.Label(text);
-            GUILayout.EndHorizontal();
-        }
-
-        public static Light LightSelector(LightManager lightManager, string label, Light selected, Action<Light> onChanged = null, int columns = 3, bool enable = true, Action<bool> onChangedEnable = null, float minButtonWidth = 170f)
+        public static Light LightSelector(LightManager lightManager, string label, Light selected, Action<Light> onChanged = null, int columns = 3, bool enable = true, Action<bool> onChangedEnable = null, int minButtonWidth = 170)
         {
             GUILayout.BeginHorizontal();
             int spacing = 0;
 
             // Вычисляем количество колонок на основе доступной ширины
-            float availableWidth = Inspector.Width - 330f; // отступы
-            int adaptiveColumns = Mathf.Max(1, Mathf.FloorToInt(availableWidth / minButtonWidth));
+            int availableWidth = (Inspector.Width - 200) - 330; // отступы
+            int adaptiveColumns = Mathf.Max(1, (availableWidth / minButtonWidth));
 
             EnableToggle(label, ref spacing, ref enable, onChangedEnable);
             if (!enable)

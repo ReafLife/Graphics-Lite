@@ -71,7 +71,7 @@ namespace Graphics.Inspector
                         Slider("Shader iterations per pass", sss.ShaderIterations, 1, 20, iterations => { sss.ShaderIterations = iterations; SSSManager.UpdateSettings(); });
                         Slider("Downscale factor", sss.DownscaleFactor, 1f, 4f, "N1", sampling => { sss.DownscaleFactor = sampling; SSSManager.UpdateSettings(); });
                         Slider("Max Distance", sss.MaxDistance, 0, 9999, distance => { sss.MaxDistance = distance; SSSManager.UpdateSettings(); });
-                        SelectionMask("Layers", sss.LayerBitMask, layer => { sss.LayerBitMask = layer; SSSManager.UpdateSettings(); }, 4);
+                        SelectionMaskVertical("Layers", sss.LayerBitMask, layer => { sss.LayerBitMask = layer; SSSManager.UpdateSettings(); }, 4);
 
                         GUILayout.Space(20);
                         Label("DITHERING", "", true);

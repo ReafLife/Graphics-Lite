@@ -71,7 +71,7 @@ namespace Graphics.Inspector
                         Toggle("HDR", probe.hdr, false, hdr => { probe.hdr = hdr; QueueProbeUpdate(probe); });
                         Text("Shadow Distance", probe.shadowDistance, "N0", distance => { probe.shadowDistance = distance; QueueProbeUpdate(probe); });
                         Selection("Clear Flags", probe.clearFlags, flag => { probe.clearFlags = flag; QueueProbeUpdate(probe); });
-                        SelectionMask("Culling Mask", probe.cullingMask, mask => { probe.cullingMask = mask; QueueProbeUpdate(probe); });
+                        SelectionMaskVertical("Culling Mask", probe.cullingMask, mask => { probe.cullingMask = mask; QueueProbeUpdate(probe); }, 3);
                         Text("Clipping Planes - Near", probe.nearClipPlane, "N2", plane => { probe.nearClipPlane = plane; QueueProbeUpdate(probe); });
                         Text("Clipping Planes - Far", probe.farClipPlane, "N0", plane => { probe.farClipPlane = plane; QueueProbeUpdate(probe); });
                         SliderColor("Background", probe.backgroundColor, colour => { probe.backgroundColor = colour; QueueProbeUpdate(probe); });
