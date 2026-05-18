@@ -49,11 +49,9 @@
       <HintPath>..\packages\ExtensibleSaveFormat.AIGirl.21.1.2\lib\net46\AI_ExtensibleSaveFormat.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="AI_Hooah">
-      <HintPath>..\packagesdll\AI_Hooah.dll</HintPath>
-    </Reference>
-    <Reference Include="AI_HooahUtility">
-      <HintPath>..\packagesdll\AI_HooahUtility.dll</HintPath>
+    <Reference Include="AI_Hooah, Version=2.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\IllusionLibs.Hooh.AI.Hooah.2.2.0\lib\net46\AI_Hooah.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\IllusionLibs.AIGirl.Assembly-CSharp.2020.5.29.5\lib\net46\Assembly-CSharp.dll</HintPath>
@@ -61,10 +59,6 @@
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\IllusionLibs.AIGirl.Assembly-CSharp-firstpass.2020.5.29.5\lib\net46\Assembly-CSharp-firstpass.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Aura2_Core">
-      <HintPath>..\packagesdll\Aura2_Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx, Version=5.4.22.0, Culture=neutral, processorArchitecture=MSIL">
@@ -203,6 +197,7 @@
     <Error Condition="!Exists('..\packages\IllusionLibs.AIGirl.Sirenix.Serialization.2020.5.29.5\build\IllusionLibs.AIGirl.Sirenix.Serialization.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\IllusionLibs.AIGirl.Sirenix.Serialization.2020.5.29.5\build\IllusionLibs.AIGirl.Sirenix.Serialization.targets'))" />
     <Error Condition="!Exists('..\packages\IllusionLibs.AIGirl.UniRx.2020.5.29.5\build\IllusionLibs.AIGirl.UniRx.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\IllusionLibs.AIGirl.UniRx.2020.5.29.5\build\IllusionLibs.AIGirl.UniRx.targets'))" />
     <Error Condition="!Exists('..\packages\IllusionLibs.AIGirl.Unity.TextMeshPro.2018.2.21.4\build\IllusionLibs.AIGirl.Unity.TextMeshPro.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\IllusionLibs.AIGirl.Unity.TextMeshPro.2018.2.21.4\build\IllusionLibs.AIGirl.Unity.TextMeshPro.targets'))" />
+    <Error Condition="!Exists('..\packages\IllusionLibs.Hooh.AI.Hooah.2.2.0\build\IllusionLibs.Hooh.AI.Hooah.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\IllusionLibs.Hooh.AI.Hooah.2.2.0\build\IllusionLibs.Hooh.AI.Hooah.targets'))" />
   </Target>
   <Import Project="..\packages\IllusionLibs.AIGirl.Cinemachine.2018.2.21.4\build\IllusionLibs.AIGirl.Cinemachine.targets" Condition="Exists('..\packages\IllusionLibs.AIGirl.Cinemachine.2018.2.21.4\build\IllusionLibs.AIGirl.Cinemachine.targets')" />
   <Import Project="..\packages\IllusionLibs.AIGirl.Unity.Postprocessing.Runtime.2018.2.21.4\build\IllusionLibs.AIGirl.Unity.Postprocessing.Runtime.targets" Condition="Exists('..\packages\IllusionLibs.AIGirl.Unity.Postprocessing.Runtime.2018.2.21.4\build\IllusionLibs.AIGirl.Unity.Postprocessing.Runtime.targets')" />
@@ -224,4 +219,5 @@
   <Import Project="..\packages\IllusionLibs.AIGirl.Sirenix.Serialization.2020.5.29.5\build\IllusionLibs.AIGirl.Sirenix.Serialization.targets" Condition="Exists('..\packages\IllusionLibs.AIGirl.Sirenix.Serialization.2020.5.29.5\build\IllusionLibs.AIGirl.Sirenix.Serialization.targets')" />
   <Import Project="..\packages\IllusionLibs.AIGirl.UniRx.2020.5.29.5\build\IllusionLibs.AIGirl.UniRx.targets" Condition="Exists('..\packages\IllusionLibs.AIGirl.UniRx.2020.5.29.5\build\IllusionLibs.AIGirl.UniRx.targets')" />
   <Import Project="..\packages\IllusionLibs.AIGirl.Unity.TextMeshPro.2018.2.21.4\build\IllusionLibs.AIGirl.Unity.TextMeshPro.targets" Condition="Exists('..\packages\IllusionLibs.AIGirl.Unity.TextMeshPro.2018.2.21.4\build\IllusionLibs.AIGirl.Unity.TextMeshPro.targets')" />
+  <Import Project="..\packages\IllusionLibs.Hooh.AI.Hooah.2.2.0\build\IllusionLibs.Hooh.AI.Hooah.targets" Condition="Exists('..\packages\IllusionLibs.Hooh.AI.Hooah.2.2.0\build\IllusionLibs.Hooh.AI.Hooah.targets')" />
 </Project>
