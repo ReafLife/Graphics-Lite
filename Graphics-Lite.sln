@@ -1,36 +1,48 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.7.11811.120 insiders
+VisualStudioVersion = 18.7.11811.120
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIGraphics", "AIGraphics\AIGraphics.csproj", "{535A64F6-5478-4F5E-8B99-9CD6AC4D4A97}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A707771D-D402-406D-8B19-87C96E5922C8}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Graphics-Lite", "Graphics-Lite", "{32BD1A73-A322-48A3-B2D2-0C1A8F3A66BD}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared", "Shared\Shared.shproj", "{732E22FD-82A6-47E9-B18E-AFF3EDE653ED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIGraphics", "AIGraphics\AIGraphics.csproj", "{535A64F6-5478-4F5E-8B99-9CD6AC4D4A97}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HS2Graphics", "HS2Graphics\HS2Graphics.csproj", "{04B05781-2D6A-4804-969B-D2BE6A4639AD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Solution", "_Solution", "{A707771D-D402-406D-8B19-87C96E5922C8}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		ISSUE_TEMPLATE.md = ISSUE_TEMPLATE.md
+		LICENSE = LICENSE
+		nuget.config = nuget.config
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Release|x64 = Release|x64
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{535A64F6-5478-4F5E-8B99-9CD6AC4D4A97}.Debug|x64.ActiveCfg = Debug|x64
-		{535A64F6-5478-4F5E-8B99-9CD6AC4D4A97}.Debug|x64.Build.0 = Debug|x64
-		{535A64F6-5478-4F5E-8B99-9CD6AC4D4A97}.Release|x64.ActiveCfg = Release|x64
-		{535A64F6-5478-4F5E-8B99-9CD6AC4D4A97}.Release|x64.Build.0 = Release|x64
-		{04B05781-2D6A-4804-969B-D2BE6A4639AD}.Debug|x64.ActiveCfg = Debug|x64
-		{04B05781-2D6A-4804-969B-D2BE6A4639AD}.Debug|x64.Build.0 = Debug|x64
-		{04B05781-2D6A-4804-969B-D2BE6A4639AD}.Release|x64.ActiveCfg = Release|x64
-		{04B05781-2D6A-4804-969B-D2BE6A4639AD}.Release|x64.Build.0 = Release|x64
+		{535A64F6-5478-4F5E-8B99-9CD6AC4D4A97}.Debug|Any CPU.ActiveCfg = Debug|AnyCPU
+		{535A64F6-5478-4F5E-8B99-9CD6AC4D4A97}.Debug|Any CPU.Build.0 = Debug|AnyCPU
+		{535A64F6-5478-4F5E-8B99-9CD6AC4D4A97}.Release|Any CPU.ActiveCfg = Release|AnyCPU
+		{535A64F6-5478-4F5E-8B99-9CD6AC4D4A97}.Release|Any CPU.Build.0 = Release|AnyCPU
+		{04B05781-2D6A-4804-969B-D2BE6A4639AD}.Debug|Any CPU.ActiveCfg = Debug|AnyCPU
+		{04B05781-2D6A-4804-969B-D2BE6A4639AD}.Debug|Any CPU.Build.0 = Debug|AnyCPU
+		{04B05781-2D6A-4804-969B-D2BE6A4639AD}.Release|Any CPU.ActiveCfg = Release|AnyCPU
+		{04B05781-2D6A-4804-969B-D2BE6A4639AD}.Release|Any CPU.Build.0 = Release|AnyCPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{732E22FD-82A6-47E9-B18E-AFF3EDE653ED} = {32BD1A73-A322-48A3-B2D2-0C1A8F3A66BD}
+		{535A64F6-5478-4F5E-8B99-9CD6AC4D4A97} = {32BD1A73-A322-48A3-B2D2-0C1A8F3A66BD}
+		{04B05781-2D6A-4804-969B-D2BE6A4639AD} = {32BD1A73-A322-48A3-B2D2-0C1A8F3A66BD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {216071F6-66C8-4340-87FE-ECC7C7B4E7DC}
