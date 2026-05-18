@@ -609,7 +609,11 @@ namespace Knife.DeferredDecals
                     Terrain terrain = Terrain.activeTerrain;
                     terrain.drawHeightmap = true;
                     Shader.SetGlobalMatrix("_World2Terrain", terrain.transform.worldToLocalMatrix);
+#if AI
+                    //do nothing
+#else
                     Shader.SetGlobalTexture("_TerrainHeightMap", terrain.terrainData.heightmapTexture);
+#endif
                     Shader.SetGlobalVector("_TerrainSize", terrain.terrainData.size);
                 } else if(TerrainDecals == TerrainDecalsType.MultiTerrain)
                 {
