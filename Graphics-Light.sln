@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.7.34003.232
+# Visual Studio Version 18
+VisualStudioVersion = 18.7.11811.120 insiders
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIGraphics", "AIGraphics\AIGraphics.csproj", "{535A64F6-5478-4F5E-8B99-9CD6AC4D4A97}"
 EndProject
@@ -36,8 +36,8 @@ Global
 		SolutionGuid = {216071F6-66C8-4340-87FE-ECC7C7B4E7DC}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Shared\Shared.projitems*{04b05781-2d6a-4804-969b-d2be6a4639ad}*SharedItemsImports = 4
-		Shared\Shared.projitems*{535a64f6-5478-4f5e-8b99-9cd6ac4d4a97}*SharedItemsImports = 4
+		Shared\Shared.projitems*{04b05781-2d6a-4804-969b-d2be6a4639ad}*SharedItemsImports = 5
+		Shared\Shared.projitems*{535a64f6-5478-4f5e-8b99-9cd6ac4d4a97}*SharedItemsImports = 5
 		Shared\Shared.projitems*{732e22fd-82a6-47e9-b18e-aff3ede653ed}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal
